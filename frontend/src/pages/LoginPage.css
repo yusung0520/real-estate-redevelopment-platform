@@ -1,0 +1,92 @@
+/* LoginPage.css */
+.apple-login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  background-color: #f5f5f7; /* 애플 특유의 밝은 회색 배경 */
+}
+
+.login-box {
+  width: 100%;
+  max-width: 400px;
+  padding: 40px;
+  text-align: center;
+}
+
+.brand-logo {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.login-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin-bottom: 8px;
+}
+
+.login-header p {
+  font-size: 14px;
+  color: #86868b;
+  margin-bottom: 40px;
+}
+
+.input-field {
+  margin-bottom: 12px;
+}
+
+.input-field input {
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #d2d2d7;
+  background-color: #ffffff;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+/* 💡 포커스 시 사용자님의 포인트 컬러 적용 */
+.input-field input:focus {
+  border-color: #5757e9;
+  box-shadow: 0 0 0 4px rgba(87, 87, 233, 0.1);
+}
+
+.apple-submit-btn {
+  width: 100%;
+  padding: 16px;
+  margin-top: 24px;
+  background-color: #5757e9; /* 선택하신 블루 컬러 */
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.apple-submit-btn:hover {
+  opacity: 0.9;
+}
+
+.login-footer {
+  margin-top: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+
+.login-footer a {
+  color: #0066cc;
+  text-decoration: none;
+}
+.login-footer .divider {
+  width: 1px;
+  height: 12px;
+  background-color: #d2d2d7;
+  margin: 0 12px;
+}

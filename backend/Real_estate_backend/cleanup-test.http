@@ -1,0 +1,32 @@
+### cafe_id 20개만 채우기 테스트
+GET http://localhost:8080/admin/debug/cleanup/cafes/fill-cafe-id?limit=20
+
+### cafe_id 전체 채우기
+GET http://localhost:8080/admin/debug/cleanup/cafes/fill-cafe-id
+
+###
+GET http://localhost:8080/admin/debug/cleanup/cafes/fill-cafe-id?limit=5000
+
+### 1) exact 매칭 (실제 반영)
+POST http://localhost:8080/internal/debug/cleanup-cafes/auto-match/exact?dryRun=false
+Content-Type: application/json
+
+{}
+
+### 2) contains 매칭 (실제 반영)
+POST http://localhost:8080/internal/debug/cleanup-cafes/auto-match/contains?dryRun=false
+Content-Type: application/json
+
+{}
+
+### auto-match exact
+POST http://localhost:8080/internal/debug/cleanup-cafes/auto-match/exact?dryRun=false
+
+### auto-match contains
+POST http://localhost:8080/internal/debug/cleanup-cafes/auto-match/contains?dryRun=false
+
+###false&minLen=2
+POST http://localhost:8080/internal/debug/cleanup-cafes/auto-match/contains?dryRun=false&minLen=2
+
+###false&minLen=3
+POST http://localhost:8080/internal/debug/cleanup-cafes/auto-match/contains?dryRun=false&minLen=3

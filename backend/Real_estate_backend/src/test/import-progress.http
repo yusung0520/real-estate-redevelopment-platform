@@ -1,0 +1,2 @@
+### OpenAPI 진행이력 import
+POST http://localhost:8080/openapi/progress/import?bizNo=11380-100001036&start=1&end=50

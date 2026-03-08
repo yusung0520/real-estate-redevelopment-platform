@@ -1,0 +1,52 @@
+### 1) preview (GET)
+GET http://localhost:8080/api/internal/import/geojson/preview?limit=3
+
+###
+
+### 2) dry-run (POST)
+POST http://localhost:8080/api/internal/import/geojson/map-by-name?dryRun=true&limit=20&sourceVersion=2025-12-27-test
+
+###
+
+### 3) 실제 반영 (POST)
+POST http://localhost:8080/api/internal/import/geojson/map-by-name?dryRun=false&limit=0&sourceVersion=2025-12-27-v1
+
+###
+POST http://localhost:8080/api/internal/import/geojson/map-by-name?dryRun=true&limit=200&sourceVersion=test
+
+###
+POST http://localhost:8080/api/internal/import/geojson/map-by-name?dryRun=true&limit=20&sourceVersion=test
+
+
+###
+POST http://localhost:8080/api/internal/import/geojson/import-all?dryRun=true&limit=50&sourceVersion=geojson-test
+
+###
+POST http://localhost:8080/api/internal/import/geojson/import-all?dryRun=false&limit=0&sourceVersion=geojson-2025-12-27
+
+###
+POST http://localhost:8080/api/internal/import/geojson/import-all?dryRun=false&limit=10&sourceVersion=geojson-2025-12-27
+
+###
+POST http://localhost:8080/api/internal/import/geojson/import-all?dryRun=false&limit=0&sourceVersion=geojson-2025-12-27
+
+###
+GET http://localhost:8080/api/areas/polygons?page=0&size=3
+
+###
+GET http://localhost:8080/api/areas/polygons?page=0&size=3
+
+###C:\Users\nayus\OneDrive\Desktop\redevelopment_4326_with_props.geojson
+POST http://localhost:8080/admin/debug/areas-v3/import-one?filePath=C:\Users\nayus\OneDrive\Desktop\redevelopment_4326_with_props.geojson
+
+###/import-all?filePath
+POST http://localhost:8080/admin/debug/areas-v3/import-all?filePath=C:/Users/nayus/OneDrive/Desktop/redevelopment_4326_with_props.geojson
+
+###
+GET http://localhost:8080/admin/debug/areas-v3/analyze-file?filePath=C:/Users/nayus/OneDrive/Desktop/redevelopment_4326_with_props.geojson
+
+###redevelopment_4326_with_sigungu
+POST http://localhost:8080/admin/debug/areas-v3/import-all?filePath=C:/Users/nayus/OneDrive/Desktop/redevelopment_4326_with_sigungu.geojson
+
+###
+POST http://localhost:8080/admin/debug/areas-v3/import-all?filePath=C:/Users/nayus/OneDrive/Desktop/redevelopment_4326_with_sigungu_v2.geojson

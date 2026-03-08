@@ -1,0 +1,86 @@
+HELP.md
+
+# ===============================
+# Gradle / Build
+# ===============================
+.gradle/
+build/
+out/
+target/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# ===============================
+# Java
+# ===============================
+*.class
+*.jar
+*.war
+
+# ===============================
+# Local secret config (중요)
+# ===============================
+src/main/resources/application-local.properties
+src/main/resources/application-local.yml
+src/main/resources/application-dev.properties
+src/main/resources/application-dev.yml
+src/main/resources/application-secret.yml
+src/main/resources/application-prod.yml
+
+# ===============================
+# Environment files
+# ===============================
+.env
+.env.*
+*.local
+
+# ===============================
+# GIS / Map data
+# ===============================
+src/main/resources/data/*.geojson
+src/main/resources/data/*.qmd
+src/main/resources/data/*.shp
+src/main/resources/data/*.dbf
+src/main/resources/data/*.prj
+src/main/resources/data/*.shx
+
+# ===============================
+# Spring / STS
+# ===============================
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+# ===============================
+# IntelliJ
+# ===============================
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# ===============================
+# VS Code
+# ===============================
+.vscode/
+
+# ===============================
+# Logs
+# ===============================
+logs/
+*.log
+
+# ===============================
+# OS files
+# ===============================
+.DS_Store
+Thumbs.db
+Desktop.ini
