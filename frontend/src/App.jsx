@@ -2,12 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import KakaoMap from "./components/KakaoMap";
 import AreaDetailPage from "./pages/AreaDetailPage";
 import LoginPage from "./pages/LoginPage";
-import ProfilePage from "./pages/ProfilePage"; // ✅ 프로필 페이지 컴포넌트 추가 필요
+import SignupPage from "./pages/SignupPage";
+import FindAccountPage from "./pages/FindAccountPage"; // ✅ 추가됨
+import ProfilePage from "./pages/ProfilePage";
 import { apiGet } from "./api/client";
 import "./App.css";
 
 export default function App() {
-  const [view, setView] = useState("map"); // 'map', 'login', 'profile' 제어
+  const [view, setView] = useState("map");
   const [selectedAreaId, setSelectedAreaId] = useState(null);
   const [mapCenter, setMapCenter] = useState(null);
   const [isBroker, setIsBroker] = useState(false);
@@ -17,7 +19,6 @@ export default function App() {
   const [showDropdown, setShowDropdown] = useState(false);
   const searchContainerRef = useRef(null);
 
-  // 실시간 검색 및 "정보 부족 구역" 완전 제외 로직
   useEffect(() => {
     const fetchResults = async () => {
       if (searchTerm.trim().length < 2) {
@@ -28,16 +29,13 @@ export default function App() {
       try {
         const encodedTerm = encodeURIComponent(searchTerm.trim());
         const res = await apiGet(`/api/areas/search?q=${encodedTerm}`);
-
         const rawResults = Array.isArray(res)
           ? res
           : res?.data || res?.content || [];
-
         const filteredResults = rawResults.filter((area) => {
           const stage = (area.stage || "").trim();
           return stage !== "" && stage !== "정보 없음";
         });
-
         setSearchResults(filteredResults);
         setShowDropdown(filteredResults.length > 0);
       } catch (error) {
@@ -61,7 +59,6 @@ export default function App() {
     }
   };
 
-  // ✅ 중개사 로그인/로그아웃 버튼 핸들러
   const handleLoginButtonClick = () => {
     if (isBroker) {
       setIsBroker(false);
@@ -73,45 +70,40 @@ export default function App() {
     }
   };
 
-  // ✅ 로그인 성공 시 호출될 함수
   const handleLoginSuccess = () => {
     setIsBroker(true);
     setView("map");
   };
 
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (
-        searchContainerRef.current &&
-        !searchContainerRef.current.contains(e.target)
-      ) {
-        setShowDropdown(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // ---------------------------------------------------------
-  // 화면 렌더링 분기 (View 제어)
-  // ---------------------------------------------------------
-
-  // 1. 로그인 화면
-  if (view === "login") {
+  // ✅ 1. 로그인 화면 처리
+  if (view === "login")
     return (
       <LoginPage
         onLoginSuccess={handleLoginSuccess}
         onBack={() => setView("map")}
+        onGoSignup={() => setView("signup")}
+        onGoFindAccount={() => setView("findAccount")} // ✅ 추가: 찾기 페이지로 이동
       />
     );
-  }
 
-  // 2. 프로필 관리 화면
-  if (view === "profile") {
-    return <ProfilePage onBack={() => setView("map")} />;
-  }
+  // ✅ 2. 회원가입 화면 처리
+  if (view === "signup")
+    return (
+      <SignupPage
+        onBack={() => setView("login")}
+        onSignupSuccess={() => {
+          alert("가입 신청이 완료되었습니다. 로그인 해주세요.");
+          setView("login");
+        }}
+      />
+    );
 
-  // 3. 메인 지도 화면
+  // ✅ 3. 아이디/비밀번호 찾기 화면 처리 (추가됨)
+  if (view === "findAccount")
+    return <FindAccountPage onBack={() => setView("login")} />;
+
+  if (view === "profile") return <ProfilePage onBack={() => setView("map")} />;
+
   return (
     <div className="app-container">
       <header className="navbar">
@@ -136,32 +128,15 @@ export default function App() {
           </nav>
         </div>
         <div className="nav-right">
-          <div
-            className="nav-user-zone"
-            style={{ display: "flex", alignItems: "center", gap: "12px" }}
-          >
-            {/* ✅ 로그인 시에만 나타나는 둥근 프로필 버튼 */}
+          <div className="nav-user-zone">
             {isBroker && (
               <button
                 className="profile-circle-btn"
                 onClick={() => setView("profile")}
-                style={{
-                  width: "36px",
-                  height: "36px",
-                  borderRadius: "50%",
-                  backgroundColor: "#e5e5ea",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: "18px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
               >
                 👤
               </button>
             )}
-
             <button className="broker-btn" onClick={handleLoginButtonClick}>
               {isBroker ? "로그아웃" : "중개사 로그인"}
             </button>
@@ -209,35 +184,25 @@ export default function App() {
 
           <div
             className="sidebar-scroll-content"
-            style={{ flex: 1, overflowY: "auto", position: "relative" }}
+            style={{ flex: 1, overflowY: "auto" }}
           >
             {selectedAreaId ? (
-              <div className="sidebar-inner" style={{ position: "relative" }}>
-                <button
-                  className="close-btn"
-                  onClick={() => {
+              <div className="sidebar-inner" style={{ height: "100%" }}>
+                <AreaDetailPage
+                  areaId={selectedAreaId}
+                  isBroker={isBroker}
+                  onExit={() => {
                     setSelectedAreaId(null);
                     setSearchTerm("");
                     setMapCenter(null);
                   }}
-                >
-                  ×
-                </button>
-                <AreaDetailPage areaId={selectedAreaId} isBroker={isBroker} />
+                />
               </div>
             ) : (
               <div className="sidebar-placeholder">
                 <div className="placeholder-content">
                   <div className="apple-icon-circle">📍</div>
-                  <p
-                    style={{
-                      fontSize: "16px",
-                      color: "#86868b",
-                      fontWeight: "500",
-                    }}
-                  >
-                    구역명을 검색, 클릭하여 정보를 확인하세요.
-                  </p>
+                  <p>구역명을 검색, 클릭하여 정보를 확인하세요.</p>
                 </div>
               </div>
             )}

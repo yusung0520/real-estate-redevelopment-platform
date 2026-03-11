@@ -10,7 +10,7 @@
 
 .login-box {
   width: 100%;
-  max-width: 400px;
+  max-width: 420px; /* 링크 3개를 위해 너비를 살짝 조정했습니다 */
   padding: 40px;
   text-align: center;
 }
@@ -78,15 +78,26 @@
   align-items: center;
   justify-content: center;
   font-size: 13px;
+  /* 링크가 3개로 늘어남에 따라 줄바꿈 및 간격 설정 추가 */
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .login-footer a {
   color: #0066cc;
   text-decoration: none;
+  padding: 4px 8px;
+  transition: color 0.2s;
 }
+
+.login-footer a:hover {
+  color: #5757e9;
+  text-decoration: underline;
+}
+
 .login-footer .divider {
   width: 1px;
   height: 12px;
   background-color: #d2d2d7;
-  margin: 0 12px;
+  margin: 0 4px; /* 간격을 살짝 좁혀서 3개가 한 줄에 잘 들어오게 함 */
 }

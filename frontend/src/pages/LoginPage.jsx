@@ -1,34 +1,56 @@
-import React, { useState } from "react"; // ✅ useState 추가
+import React, { useState } from "react";
+import { apiPost } from "../api/client";
 import "./LoginPage.css";
 
-export default function LoginPage({ onLoginSuccess, onBack }) {
-  // ✅ 입력값을 관리하기 위한 상태 추가
+export default function LoginPage({
+  onLoginSuccess,
+  onBack,
+  onGoSignup,
+  onGoFindAccount,
+}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
-    // 💡 [참고] 나중에 백엔드와 연결할 때 이곳에서 api 호출을 합니다.
-    console.log("로그인 시도:", { email, password });
+    try {
+      const res = await apiPost("/api/agents/login", { email, password });
 
-    // 지금은 테스트 단계이므로 버튼을 누르면 즉시 성공 처리하여 지도로 보냅니다.
-    if (onLoginSuccess) {
-      onLoginSuccess();
+      if (res && res.message === "로그인 성공") {
+        console.log("로그인 성공:", res);
+        alert(`${res.name} 중개사님, 환영합니다!`);
+        onLoginSuccess();
+      } else {
+        alert("로그인 정보가 올바르지 않습니다.");
+      }
+    } catch (error) {
+      console.error("로그인 실패:", error);
+      alert(error.message || "아이디 또는 비밀번호가 올바르지 않습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ 수정: alert 대신 화면 전환 함수를 호출합니다.
+  const handleFindAccount = (e) => {
+    e.preventDefault();
+    if (onGoFindAccount) {
+      onGoFindAccount();
     }
   };
 
   return (
     <div className="apple-login-container">
       <div className="login-box">
-        {/* 헤더 섹션: 브랜드 정체성 */}
         <div className="login-header">
           <div className="brand-logo">🏗️</div>
           <h1>재개발 Connect</h1>
           <p>공인중개사 전용 관리 시스템</p>
         </div>
 
-        {/* 입력 섹션: 깔끔한 인풋창 */}
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="input-field">
             <input
@@ -37,6 +59,7 @@ export default function LoginPage({ onLoginSuccess, onBack }) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
           <div className="input-field">
@@ -46,17 +69,16 @@ export default function LoginPage({ onLoginSuccess, onBack }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
 
-          <button type="submit" className="apple-submit-btn">
-            로그인
+          <button type="submit" className="apple-submit-btn" disabled={loading}>
+            {loading ? "로그인 중..." : "로그인"}
           </button>
         </form>
 
-        {/* 하단 보조 섹션: 심플한 링크 */}
         <div className="login-footer">
-          {/* ✅ 클릭 시 지도로 돌아가는 기능 연결 */}
           <a
             href="#"
             onClick={(e) => {
@@ -67,7 +89,19 @@ export default function LoginPage({ onLoginSuccess, onBack }) {
             지도로 돌아가기
           </a>
           <div className="divider"></div>
-          <a href="#">중개사 회원가입 신청</a>
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              onGoSignup();
+            }}
+          >
+            중개사 회원가입
+          </a>
+          <div className="divider"></div>
+          <a href="#" onClick={handleFindAccount}>
+            아이디/비밀번호 찾기
+          </a>
         </div>
       </div>
     </div>

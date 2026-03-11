@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { apiGet } from "../api/client";
 import "./AreaDetail.css";
 
-// ✅ 1~14 전체 사업 진행 단계 정의
 const ALL_BUSINESS_STAGES = [
   { order: 1, label: "기본계획수립" },
   { order: 2, label: "안전진단" },
@@ -23,13 +22,12 @@ const ALL_BUSINESS_STAGES = [
 function formatDay(day) {
   if (!day) return "";
   const s = String(day).replace(/-/g, "").trim();
-  if (s.length === 8) {
+  if (s.length === 8)
     return `${s.slice(0, 4)}.${Number(s.slice(4, 6))}.${Number(s.slice(6, 8))}`;
-  }
   return s;
 }
 
-export default function AreaDetailPage({ areaId, isBroker }) {
+export default function AreaDetailPage({ areaId, isBroker, onExit }) {
   const [areaData, setAreaData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -54,18 +52,29 @@ export default function AreaDetailPage({ areaId, isBroker }) {
 
   return (
     <div className="area-detail-container">
-      {/* ✅ 헤더: CSS에서 가운데 정렬 처리 */}
-      <header className="detail-header">
-        <div className="tag-group">
-          <span className="type-tag">재개발</span>
-          {areaData.stage && (
-            <span className="stage-tag">{areaData.stage}</span>
-          )}
+      {isBroker && (
+        <div className="broker-admin-status-bar">
+          <span className="admin-dot"></span>
+          <span className="admin-label">중개사 전용 모드 활성</span>
         </div>
-        <h2 className="area-title">{areaData.name}</h2>
-        <p className="area-address">
-          {areaData.sigunguCd} {areaData.emdNm || ""}
-        </p>
+      )}
+
+      <header className="detail-header-v2">
+        <button className="header-close-btn" onClick={onExit}>
+          ✕
+        </button>
+        <div className="header-content-center">
+          <div className="tag-group">
+            <span className="type-tag">재개발</span>
+            {areaData.stage && (
+              <span className="stage-tag">{areaData.stage}</span>
+            )}
+          </div>
+          <h2 className="area-title">{areaData.name}</h2>
+          <p className="area-address">
+            {areaData.sigunguCd} {areaData.emdNm || ""}
+          </p>
+        </div>
       </header>
 
       <section className="timeline-section">
@@ -76,7 +85,6 @@ export default function AreaDetailPage({ areaId, isBroker }) {
             const apiItem = areaData.timeline?.find(
               (item) => item.label === baseStage.label,
             );
-
             let statusClass = "TODO";
             if (apiItem?.isCurrent) statusClass = "CURRENT";
             else if (apiItem?.done) statusClass = "DONE";
@@ -97,10 +105,10 @@ export default function AreaDetailPage({ areaId, isBroker }) {
                 </div>
                 <div className="timeline-right">
                   <div className="step-content">
-                    <span className="step-order-label">
+                    <div className="step-main">
                       <span className="order-num">{baseStage.order}</span>
                       <span className="label-text">{baseStage.label}</span>
-                    </span>
+                    </div>
                     <span className="step-date">
                       {apiItem?.date ? formatDay(apiItem.date) : ""}
                     </span>
@@ -115,11 +123,12 @@ export default function AreaDetailPage({ areaId, isBroker }) {
         </div>
       </section>
 
-      {isBroker && (
-        <div className="broker-actions">
-          <button className="apple-action-btn">매물 등록 및 단계 수정</button>
+      <section className="broker-briefing-preview">
+        <h3 className="section-title">전문가 현장 브리핑</h3>
+        <div className="briefing-box-placeholder">
+          <p>중개사님이 등록한 최신 소식이 이곳에 표시됩니다.</p>
         </div>
-      )}
+      </section>
     </div>
   );
 }

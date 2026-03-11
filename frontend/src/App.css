@@ -1,6 +1,6 @@
-/* App.css - 전체 스타일 최종 통합 복구 버전 */
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
 
+/* 1. 기본 초기화 */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -31,7 +31,7 @@ body {
   height: 100vh;
 }
 
-/* --- 1. 상단 내비바 & 버튼 스타일 --- */
+/* 2. 상단 네비바 */
 .navbar {
   height: 52px;
   background: rgba(255, 255, 255, 0.75);
@@ -46,13 +46,32 @@ body {
   flex-shrink: 0;
 }
 
+.nav-user-zone {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-circle-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50% !important;
+  background-color: #e5e5ea;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  padding: 0;
+}
+
 .nav-center {
   display: flex;
   background: rgba(0, 0, 0, 0.05);
   padding: 4px;
   border-radius: 12px;
 }
-
 .tab {
   border: none;
   background: transparent;
@@ -62,15 +81,12 @@ body {
   color: #6e6e73;
   cursor: pointer;
   border-radius: 10px;
-  transition: all 0.2s;
 }
-
 .tab.active {
   background: #ffffff;
   color: #007aff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
-
 .broker-btn {
   background: #007aff;
   color: white;
@@ -82,12 +98,12 @@ body {
   cursor: pointer;
 }
 
-/* --- 2. 사이드바 & 검색창 스타일 --- */
+/* 3. 메인 컨텐츠 영역 */
 .content-body {
   display: flex;
   flex: 1;
-  position: relative;
   overflow: hidden;
+  position: relative;
 }
 
 .sidebar {
@@ -101,9 +117,17 @@ body {
   z-index: 1000;
 }
 
+.map-wrapper {
+  flex: 1;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+/* 4. 검색창 및 드롭다운 (뭉침 현상 해결 핵심) */
 .sidebar-search-area {
   padding: 24px 20px;
-  position: relative; /* 드롭다운 기준점 */
+  position: relative;
 }
 
 .search-box {
@@ -112,14 +136,6 @@ body {
   background: rgba(0, 0, 0, 0.05);
   border-radius: 14px;
   padding: 12px 16px;
-  border: 1px solid transparent;
-  transition: all 0.2s;
-}
-
-.search-box:focus-within {
-  background: #ffffff;
-  border-color: #007aff;
-  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.15);
 }
 
 .search-box input {
@@ -128,56 +144,73 @@ body {
   background: transparent;
   outline: none;
   font-size: 15px;
-  font-weight: 500;
-  color: #1d1d1f;
 }
 
-/* --- 3. [추가] 검색 드롭다운 스타일 --- */
 .search-dropdown {
   position: absolute;
   top: 76px;
   left: 20px;
   right: 20px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(25px);
+  background: white;
   border-radius: 18px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
   z-index: 9999;
-  max-height: 400px;
+  max-height: 380px;
   overflow-y: auto;
+  padding: 8px 0;
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
+/* ⭐ 텍스트 뭉침을 해결하는 핵심 레이아웃 */
 .dropdown-item {
-  padding: 14px 20px;
+  padding: 12px 20px;
   cursor: pointer;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
-  transition: all 0.2s;
+  border-bottom: 0.5px solid #f2f2f7;
+  display: flex !important;
+  flex-direction: column !important; /* 💡 위아래로 정렬 */
+  align-items: flex-start !important;
+  gap: 2px; /* 이름과 설명 사이 간격 */
+  transition: background 0.2s;
 }
 
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+/* ⭐ 마우스 올렸을 때 파란색 배경 강조 */
 .dropdown-item:hover {
-  background: #007aff;
+  background-color: #007aff !important;
 }
 
-.dropdown-item:hover .item-name,
-.dropdown-item:hover .item-address {
-  color: white;
+/* ⭐ 내부 텍스트 묶음 스타일 */
+.item-info {
+  display: flex !important;
+  flex-direction: column !important; /* 💡 내부 요소들도 강제로 줄바꿈 */
+  width: 100%;
 }
 
+/* 이름 스타일 */
 .item-name {
   font-size: 15px;
   font-weight: 700;
-  display: block;
+  color: #1d1d1f;
+  display: block; /* 💡 한 줄을 다 차지하게 함 */
 }
 
+/* 주소/단계 스타일 */
 .item-address {
   font-size: 12px;
   color: #86868b;
-  display: block;
-  margin-top: 2px;
+  display: block; /* 💡 한 줄을 다 차지하게 함 */
 }
 
-/* --- 4. 안내 문구 및 기타 --- */
+/* ⭐ 마우스 올렸을 때 글자색을 흰색으로 변경 */
+.dropdown-item:hover .item-name,
+.dropdown-item:hover .item-address {
+  color: #ffffff !important;
+}
+
+/* 5. 기타 요소 */
 .sidebar-placeholder {
   flex: 1;
   display: flex;
@@ -190,45 +223,12 @@ body {
 .apple-icon-circle {
   width: 64px;
   height: 64px;
-  background: #ffffff;
+  background: #fff;
   border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 28px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  margin: 0 auto 20px;
-  border: 1px solid rgba(0, 0, 0, 0.03);
-}
-
-.placeholder-content p {
-  font-size: 16px;
-  color: #86868b;
-  font-weight: 500;
-  line-height: 1.5;
-}
-
-.map-wrapper {
-  flex: 1;
-  height: 100%;
-  position: relative;
-  z-index: 1;
-}
-
-.close-btn {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 32px;
-  height: 32px;
-  background: rgba(0, 0, 0, 0.05);
-  border: none;
-  border-radius: 50%;
-  font-size: 24px;
-  color: #86868b;
-  cursor: pointer;
-  z-index: 1100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  margin-bottom: 20px;
 }

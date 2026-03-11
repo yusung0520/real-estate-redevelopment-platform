@@ -1,81 +1,107 @@
-/* AreaDetail.css */
 .area-detail-container {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background-color: #fff;
+  background: #fff;
 }
 
-/* ✅ 헤더 슬림화: 상하 패딩을 줄여 칸 크기를 최적화 */
-.detail-header {
-  padding: 24px 20px 16px 20px; /* 기존보다 상하 여백 축소 */
+/* 중개사 전용 상단 바 */
+.broker-admin-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background-color: #f2f2f7;
+  padding: 10px 0;
+  border-bottom: 0.5px solid #d2d2d7;
+}
+.admin-dot {
+  width: 6px;
+  height: 6px;
+  background: #34c759;
+  border-radius: 50%;
+}
+.admin-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+/* 헤더 영역 */
+.detail-header-v2 {
+  position: relative;
+  padding: 35px 20px 20px;
   background: #fff;
   border-bottom: 1px solid #f2f2f7;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   text-align: center;
 }
-
+.header-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  background: #f2f2f7;
+  border: none;
+  border-radius: 50%;
+  color: #1d1d1f;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .tag-group {
   display: flex;
   gap: 6px;
-  margin-bottom: 8px; /* 간격 축소 */
   justify-content: center;
+  margin-bottom: 10px;
 }
-
-.type-tag,
-.stage-tag {
+.type-tag {
+  background: #e8f2ff;
+  color: #0071e3;
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 11px;
   font-weight: 600;
 }
-
-.type-tag {
-  background-color: #e8f2ff;
-  color: #0071e3;
-}
 .stage-tag {
-  background-color: #f2f2f7;
+  background: #f2f2f7;
   color: #86868b;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
 }
-
-/* ✅ 구역명 폰트 및 여백 조정 */
 .area-title {
-  font-size: 19px; /* 크기 소폭 축소 */
+  font-size: 20px;
   font-weight: 700;
-  margin-bottom: 4px;
   color: #1d1d1f;
-  line-height: 1.2;
+  margin-bottom: 4px;
 }
-
 .area-address {
   font-size: 13px;
   color: #86868b;
-  margin-top: 2px;
 }
 
-/* 타임라인 섹션 */
+/* 타임라인 영역 (복구 핵심) */
 .timeline-section {
-  padding: 24px 30px;
+  padding: 24px 20px;
   background: #f5f5f7;
   flex: 1;
-  overflow-y: auto;
 }
-
 .section-title {
   font-size: 15px;
   font-weight: 700;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
+  color: #1d1d1f;
 }
 
 .timeline-row {
   display: flex;
   gap: 16px;
-  min-height: 60px; /* 콤팩트한 간격 */
-}
-
+  min-height: 54px;
+} /* 충분한 줄 간격 확보 */
 .timeline-left {
   display: flex;
   flex-direction: column;
@@ -83,7 +109,6 @@
   width: 20px;
   position: relative;
 }
-
 .node-dot {
   width: 18px;
   height: 18px;
@@ -93,10 +118,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #fff;
   font-size: 10px;
 }
-
 .node-line {
   width: 2px;
   background: #d2d2d7;
@@ -106,27 +130,20 @@
   z-index: 1;
 }
 
-/* ✅ 타임라인 우측 레이아웃: 날짜를 오른쪽 끝으로 */
 .timeline-right {
   flex: 1;
-  display: flex;
-  flex-direction: column; /* 배지가 아래로 가도록 */
-  padding-bottom: 20px;
+  padding-bottom: 15px;
 }
-
 .step-content {
   display: flex;
-  justify-content: space-between; /* 💡 이름은 왼쪽, 날짜는 오른쪽 끝 */
+  justify-content: space-between;
   align-items: center;
-  width: 100%;
 }
-
-.step-order-label {
+.step-main {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
-
 .order-num {
   font-size: 11px;
   color: #86868b;
@@ -138,30 +155,25 @@
   color: #1d1d1f;
   font-weight: 500;
 }
-
-/* ✅ 날짜 스타일: 우측 정렬 */
 .step-date {
   font-size: 12px;
   color: #86868b;
-  font-weight: 500;
-  text-align: right;
 }
 
-/* 상태별 강조 */
+/* 상태 강조 */
 .timeline-row.DONE .node-dot {
   background: #34c759;
 }
 .timeline-row.DONE .node-line {
   background: #34c759;
 }
-
 .timeline-row.CURRENT .node-dot {
   background: #fff;
   border: 2px solid #0071e3;
 }
 .inner-dot {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   background: #0071e3;
   border-radius: 50%;
 }
@@ -169,26 +181,29 @@
   color: #0071e3;
   font-weight: 700;
 }
-
 .current-badge {
-  align-self: flex-start; /* 왼쪽 정렬 */
   font-size: 10px;
   color: #0071e3;
   background: rgba(0, 113, 227, 0.1);
   padding: 1px 6px;
   border-radius: 4px;
-  font-weight: 700;
   margin-top: 4px;
+  display: inline-block;
+  font-weight: 700;
 }
 
-.apple-action-btn {
-  width: calc(100% - 60px);
-  margin: 16px 30px;
-  padding: 14px;
-  background: #0071e3;
-  color: #fff;
-  border-radius: 10px;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
+/* 브리핑 섹션 */
+.broker-briefing-preview {
+  padding: 24px 20px;
+  background: #fff;
+  border-top: 8px solid #f5f5f7;
+}
+.briefing-box-placeholder {
+  margin-top: 15px;
+  padding: 24px;
+  border: 1px dashed #d2d2d7;
+  border-radius: 14px;
+  text-align: center;
+  color: #86868b;
+  font-size: 13px;
 }
