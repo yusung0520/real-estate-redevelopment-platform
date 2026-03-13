@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./ProfilePage.css";
 
 export default function ProfilePage({ agentData, onBack, onGoWrite }) {
-  // ✅ 브리핑 글 목록 상태 (초기 예시 데이터)
+  // ✅ 브리핑 글 목록 상태 (스크롤 테스트를 위해 데이터를 조금 더 추가했습니다)
   const [posts, setPosts] = useState([
     {
       id: 1,
@@ -14,12 +14,18 @@ export default function ProfilePage({ agentData, onBack, onGoWrite }) {
       title: "성수 전략 1지구 조합원 분양 신청 관련",
       date: "2024.03.10",
     },
+    {
+      id: 3,
+      title: "자양7구역 재건축 정비계획안 공람 소식",
+      date: "2024.03.05",
+    },
+    { id: 4, title: "모아타운 투자 시 유의사항 정리", date: "2024.03.01" },
   ]);
 
   return (
     <div className="profile-page-wrapper">
       <div className="profile-card">
-        {/* 헤더 */}
+        {/* ✅ 헤더 섹션 (고정됨) */}
         <header className="profile-page-header">
           <button className="back-link-btn" onClick={onBack}>
             ✕
@@ -30,8 +36,9 @@ export default function ProfilePage({ agentData, onBack, onGoWrite }) {
           </button>
         </header>
 
+        {/* ✅ 스크롤 영역 섹션 (여기가 부드럽게 움직입니다) */}
         <div className="profile-scroll-area">
-          {/* ✅ 사진 섹션 복구 (image_d18443.png 구성) */}
+          {/* 사진 섹션 */}
           <section className="profile-photo-section">
             <div className="avatar-container">
               <div className="big-avatar">👤</div>
@@ -39,7 +46,7 @@ export default function ProfilePage({ agentData, onBack, onGoWrite }) {
             </div>
           </section>
 
-          {/* ✅ 기본 정보 섹션 (이름, 중개사무소, 연락처) */}
+          {/* 기본 정보 섹션 */}
           <section className="info-group-box">
             <div className="info-item">
               <label>이름</label>
@@ -53,7 +60,6 @@ export default function ProfilePage({ agentData, onBack, onGoWrite }) {
               <label>연락처</label>
               <input type="text" defaultValue="010-1234-5678" />
             </div>
-            {/* 이메일은 읽기전용으로 하나 추가해두면 관리가 편합니다 */}
             <div className="info-item">
               <label>이메일(아이디)</label>
               <input
@@ -64,14 +70,11 @@ export default function ProfilePage({ agentData, onBack, onGoWrite }) {
             </div>
           </section>
 
-          {/* ✅ 하단: 주력 담당 구역 대신 "내 현장 브리핑 관리" */}
+          {/* 브리핑 관리 섹션 */}
           <section className="info-group-box">
             <div className="briefing-header">
               <label>내 현장 브리핑 관리</label>
-              <button
-                className="small-add-btn"
-                onClick={onGoWrite} // App.jsx에서 넘겨받은 글쓰기 페이지 전환 함수
-              >
+              <button className="small-add-btn" onClick={onGoWrite}>
                 + 새 글 작성
               </button>
             </div>
@@ -84,32 +87,16 @@ export default function ProfilePage({ agentData, onBack, onGoWrite }) {
                       <span className="post-title-txt">{post.title}</span>
                       <span className="post-date-txt">{post.date}</span>
                     </div>
-                    <span style={{ color: "#d2d2d7" }}>〉</span>
+                    <span className="arrow-icon">〉</span>
                   </div>
                 ))
               ) : (
-                <div
-                  style={{
-                    textAlign: "center",
-                    padding: "20px",
-                    color: "#86868b",
-                    fontSize: "14px",
-                  }}
-                >
-                  등록된 브리핑이 없습니다.
-                </div>
+                <div className="no-posts">등록된 브리핑이 없습니다.</div>
               )}
             </div>
           </section>
 
-          <p
-            style={{
-              textAlign: "center",
-              fontSize: "12px",
-              color: "#86868b",
-              marginTop: "10px",
-            }}
-          >
+          <p className="profile-footer-msg">
             위 정보는 재개발 구역 상세 페이지에서 투자자들에게 공개됩니다.
           </p>
         </div>
