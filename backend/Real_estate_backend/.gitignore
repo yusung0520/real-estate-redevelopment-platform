@@ -84,3 +84,9 @@ logs/
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+# Upload files
+uploads/
+realestate_uploads/
+**/uploads/
+**/realestate_uploads/
