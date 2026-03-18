@@ -17,7 +17,7 @@ public class AgentController {
     private final AgentService agentService;
 
     /**
-     * ✅ 회원가입 API
+     * 회원가입 API
      */
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody AgentSignupRequest request) {
@@ -30,7 +30,7 @@ public class AgentController {
     }
 
     /**
-     * ✅ 로그인 API
+     * 로그인 API
      */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginData) {
@@ -44,18 +44,24 @@ public class AgentController {
                     "message", "로그인 성공",
                     "agentId", agent.getAgentId(),
                     "name", agent.getName(),
-                    "email", agent.getEmail()
+                    "email", agent.getEmail(),
+                    "officeName", agent.getOfficeName(),
+                    "phone", agent.getPhone()
             ));
 
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of(
+                    "message", e.getMessage()
+            ));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(Map.of("message", "서버 내부 오류가 발생했습니다."));
+            return ResponseEntity.internalServerError().body(Map.of(
+                    "message", "서버 내부 오류가 발생했습니다."
+            ));
         }
     }
 
     /**
-     * ✅ 아이디/비밀번호 찾기 API
+     * 아이디/비밀번호 찾기 API
      * POST /api/agents/find-account
      */
     @PostMapping("/find-account")
@@ -63,7 +69,7 @@ public class AgentController {
         try {
             String name = findData.get("name");
             String phone = findData.get("phone");
-            String type = findData.get("type"); // "email" 또는 "password"
+            String type = findData.get("type");
 
             String result;
             if ("email".equals(type)) {
@@ -75,9 +81,13 @@ public class AgentController {
             return ResponseEntity.ok(Map.of("result", result));
 
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of(
+                    "message", e.getMessage()
+            ));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(Map.of("message", "오류가 발생했습니다."));
+            return ResponseEntity.internalServerError().body(Map.of(
+                    "message", "오류가 발생했습니다."
+            ));
         }
     }
 }

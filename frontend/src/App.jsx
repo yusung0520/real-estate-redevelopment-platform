@@ -3,20 +3,32 @@ import KakaoMap from "./components/KakaoMap";
 import AreaDetailPage from "./pages/AreaDetailPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
-import FindAccountPage from "./pages/FindAccountPage"; // ✅ 추가됨
+import FindAccountPage from "./pages/FindAccountPage";
 import ProfilePage from "./pages/ProfilePage";
+import PostWritePage from "./pages/PostWritePage";
+import PostDetailPage from "./pages/PostDetailPage";
 import { apiGet } from "./api/client";
 import "./App.css";
 
 export default function App() {
   const [view, setView] = useState("map");
   const [selectedAreaId, setSelectedAreaId] = useState(null);
+  const [selectedPostId, setSelectedPostId] = useState(null);
   const [mapCenter, setMapCenter] = useState(null);
   const [isBroker, setIsBroker] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
+
+  const [brokerInfo, setBrokerInfo] = useState({
+    id: null,
+    name: "",
+    email: "",
+    officeName: "",
+    phone: "",
+  });
+
   const searchContainerRef = useRef(null);
 
   useEffect(() => {
@@ -26,22 +38,26 @@ export default function App() {
         setShowDropdown(false);
         return;
       }
+
       try {
         const encodedTerm = encodeURIComponent(searchTerm.trim());
         const res = await apiGet(`/api/areas/search?q=${encodedTerm}`);
         const rawResults = Array.isArray(res)
           ? res
           : res?.data || res?.content || [];
+
         const filteredResults = rawResults.filter((area) => {
           const stage = (area.stage || "").trim();
           return stage !== "" && stage !== "정보 없음";
         });
+
         setSearchResults(filteredResults);
         setShowDropdown(filteredResults.length > 0);
       } catch (error) {
         console.error("검색 실패:", error);
       }
     };
+
     const timer = setTimeout(fetchResults, 500);
     return () => clearTimeout(timer);
   }, [searchTerm]);
@@ -50,6 +66,7 @@ export default function App() {
     setSelectedAreaId(area.areaId || area.id);
     setSearchTerm(area.name);
     setShowDropdown(false);
+
     if (area.centerLat && area.centerLng) {
       setMapCenter({
         lat: Number(area.centerLat),
@@ -63,31 +80,49 @@ export default function App() {
     if (isBroker) {
       setIsBroker(false);
       setSelectedAreaId(null);
+      setSelectedPostId(null);
       setView("map");
+      setBrokerInfo({
+        id: null,
+        name: "",
+        email: "",
+        officeName: "",
+        phone: "",
+      });
       alert("로그아웃 되었습니다.");
     } else {
       setView("login");
     }
   };
 
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = (loginResult) => {
     setIsBroker(true);
+
+    if (loginResult) {
+      setBrokerInfo({
+        id: loginResult.agentId ?? loginResult.id ?? null,
+        name: loginResult.name ?? "",
+        email: loginResult.email ?? "",
+        officeName: loginResult.officeName ?? "",
+        phone: loginResult.phone ?? "",
+      });
+    }
+
     setView("map");
   };
 
-  // ✅ 1. 로그인 화면 처리
-  if (view === "login")
+  if (view === "login") {
     return (
       <LoginPage
         onLoginSuccess={handleLoginSuccess}
         onBack={() => setView("map")}
         onGoSignup={() => setView("signup")}
-        onGoFindAccount={() => setView("findAccount")} // ✅ 추가: 찾기 페이지로 이동
+        onGoFindAccount={() => setView("findAccount")}
       />
     );
+  }
 
-  // ✅ 2. 회원가입 화면 처리
-  if (view === "signup")
+  if (view === "signup") {
     return (
       <SignupPage
         onBack={() => setView("login")}
@@ -97,12 +132,44 @@ export default function App() {
         }}
       />
     );
+  }
 
-  // ✅ 3. 아이디/비밀번호 찾기 화면 처리 (추가됨)
-  if (view === "findAccount")
+  if (view === "findAccount") {
     return <FindAccountPage onBack={() => setView("login")} />;
+  }
 
-  if (view === "profile") return <ProfilePage onBack={() => setView("map")} />;
+  if (view === "profile") {
+    return (
+      <ProfilePage
+        agentData={brokerInfo}
+        onBack={() => setView("map")}
+        onGoWrite={() => setView("write")}
+        onOpenPostDetail={(postId) => {
+          setSelectedPostId(postId);
+          setView("postDetail");
+        }}
+      />
+    );
+  }
+
+  if (view === "write") {
+    return (
+      <PostWritePage
+        agentId={brokerInfo.id}
+        onBack={() => setView("profile")}
+        onSuccess={() => setView("profile")}
+      />
+    );
+  }
+
+  if (view === "postDetail") {
+    return (
+      <PostDetailPage
+        postId={selectedPostId}
+        onBack={() => setView("profile")}
+      />
+    );
+  }
 
   return (
     <div className="app-container">
@@ -110,6 +177,7 @@ export default function App() {
         <div className="nav-left">
           <div className="logo">🏗️ 재개발 Connect</div>
         </div>
+
         <div className="nav-center">
           <nav className="nav-tabs">
             {["home", "sintong", "moa"].map((t) => (
@@ -127,17 +195,24 @@ export default function App() {
             ))}
           </nav>
         </div>
+
         <div className="nav-right">
           <div className="nav-user-zone">
             {isBroker && (
               <button
                 className="profile-circle-btn"
                 onClick={() => setView("profile")}
+                type="button"
               >
                 👤
               </button>
             )}
-            <button className="broker-btn" onClick={handleLoginButtonClick}>
+
+            <button
+              className="broker-btn"
+              onClick={handleLoginButtonClick}
+              type="button"
+            >
               {isBroker ? "로그아웃" : "중개사 로그인"}
             </button>
           </div>
@@ -160,6 +235,7 @@ export default function App() {
                 />
                 <span style={{ color: "#86868b" }}>🔍</span>
               </div>
+
               {showDropdown && (
                 <div className="search-dropdown">
                   {searchResults.map((area, idx) => (

@@ -1,7 +1,6 @@
 package com.yusung.realestateapi.backend.area.api;
 
 import com.yusung.realestateapi.backend.area.application.PostService;
-import com.yusung.realestateapi.backend.area.domain.Post;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,25 +17,22 @@ public class PostController {
 
     private final PostService postService;
 
-    /**
-     * ✅ 블로그 게시글 작성 (텍스트 + 이미지)
-     * 이미지는 MultipartFile을 통해 파일 형태로 전달받습니다.
-     */
-    @PostMapping(value = "/write", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(value = "/write", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> writePost(
-            @RequestPart("title") String title,
-            @RequestPart("content") String content,
-            @RequestPart("categoryName") String categoryName,
-            @RequestPart("agentId") String agentId, // 로그인된 중개사 ID
-            @RequestPart(value = "images", required = false) List<MultipartFile> images
+            @RequestParam("title") String title,
+            @RequestParam("content") String content,
+            @RequestParam("categoryName") String categoryName,
+            @RequestParam("agentId") Long agentId,
+            @RequestParam("guName") String guName,
+            @RequestParam(value = "images", required = false) List<MultipartFile> images
     ) {
         try {
-            // 1. 서비스 호출하여 데이터 저장 및 파일 처리
             Long postId = postService.createPost(
-                    Long.parseLong(agentId),
+                    agentId,
                     title,
                     content,
                     categoryName,
+                    guName,
                     images
             );
 
@@ -51,11 +47,24 @@ public class PostController {
         }
     }
 
-    /**
-     * ✅ 최신 게시글 목록 조회
-     */
     @GetMapping("/list")
     public ResponseEntity<?> getPostList() {
         return ResponseEntity.ok(postService.getAllPosts());
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<?> getMyPosts(@RequestParam("agentId") Long agentId) {
+        return ResponseEntity.ok(postService.getPostsByAgent(agentId));
+    }
+
+    @GetMapping("/{postId}")
+    public ResponseEntity<?> getPostDetail(@PathVariable Long postId) {
+        try {
+            return ResponseEntity.ok(postService.getPostDetail(postId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "message", e.getMessage()
+            ));
+        }
     }
 }

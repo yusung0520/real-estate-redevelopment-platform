@@ -1,116 +1,158 @@
-import React, { useState } from "react";
-import { apiPost } from "../api/client";
-import "./PostWritePage.css";
+import React, { useEffect, useState } from "react";
+import "./ProfilePage.css";
 
-export default function PostWritePage({ agentId, onBack, onSuccess }) {
-  const [title, setTitle] = useState("");
-  const [categoryName, setCategoryName] = useState("재개발 소식");
-  const [content, setContent] = useState("");
-  const [images, setImages] = useState([]);
-  const [loading, setLoading] = useState(false);
+export default function ProfilePage({
+  agentData,
+  onBack,
+  onGoWrite,
+  onOpenPostDetail,
+}) {
+  const [posts, setPosts] = useState([]);
+  const [loadingPosts, setLoadingPosts] = useState(true);
 
-  // 이미지 선택 핸들러
-  const handleImageChange = (e) => {
-    if (e.target.files) {
-      setImages([...e.target.files]);
-    }
+  useEffect(() => {
+    const fetchMyPosts = async () => {
+      if (!agentData?.id) {
+        setPosts([]);
+        setLoadingPosts(false);
+        return;
+      }
+
+      try {
+        setLoadingPosts(true);
+
+        const response = await fetch(`/api/posts/my?agentId=${agentData.id}`);
+        if (!response.ok) {
+          throw new Error(`게시글 목록 조회 실패: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setPosts(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("내 게시글 목록 불러오기 실패:", error);
+        setPosts([]);
+      } finally {
+        setLoadingPosts(false);
+      }
+    };
+
+    fetchMyPosts();
+  }, [agentData?.id]);
+
+  const handleEditPhoto = () => {
+    alert("사진 수정 기능은 다음 단계에서 연결할 예정입니다.");
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
 
-    // 💡 파일 전송을 위해 FormData를 사용합니다.
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("content", content);
-    formData.append("categoryName", categoryName);
-    formData.append("agentId", agentId);
+    if (Number.isNaN(date.getTime())) return "";
 
-    // 여러 장의 이미지 추가
-    images.forEach((image) => {
-      formData.append("images", image);
-    });
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
 
-    try {
-      // ✅ multipart/form-data 형식으로 전송
-      await apiPost("/api/posts/write", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      alert("투자 소식이 성공적으로 등록되었습니다!");
-      onSuccess(); // 목록으로 돌아가기
-    } catch (error) {
-      alert("등록 실패: " + error.message);
-    } finally {
-      setLoading(false);
-    }
+    return `${yyyy}.${mm}.${dd}`;
   };
 
   return (
-    <div className="post-write-container">
-      <div className="post-write-box">
-        <header className="write-header">
-          <button className="back-btn" onClick={onBack}>
+    <div className="profile-page-wrapper">
+      <div className="profile-card">
+        <header className="profile-page-header">
+          <button className="back-link-btn" onClick={onBack} type="button">
             ✕
           </button>
-          <h1>투자 소식 작성</h1>
-          <button
-            className="submit-btn"
-            onClick={handleSubmit}
-            disabled={loading || !title || !content}
-          >
-            {loading ? "등록 중..." : "게시"}
+          <h1>중개사 관리 센터</h1>
+          <button className="done-btn" onClick={onBack} type="button">
+            완료
           </button>
         </header>
 
-        <form className="write-form">
-          <input
-            className="title-input"
-            type="text"
-            placeholder="제목을 입력하세요"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-
-          <select
-            className="category-select"
-            value={categoryName}
-            onChange={(e) => setCategoryName(e.target.value)}
-          >
-            <option value="재개발 소식">🏗️ 재개발 소식</option>
-            <option value="급매물 정보">💰 급매물 정보</option>
-            <option value="투자 가이드">📚 투자 가이드</option>
-            <option value="현장 사진">📸 현장 사진</option>
-          </select>
-
-          <textarea
-            className="content-textarea"
-            placeholder="투자자들에게 전달할 상세한 정보를 적어주세요..."
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-          />
-
-          <div className="image-upload-section">
-            <label htmlFor="image-input" className="image-label">
-              📷 사진 첨부 ({images.length})
-            </label>
-            <input
-              id="image-input"
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={handleImageChange}
-              style={{ display: "none" }}
-            />
-            <div className="image-preview-list">
-              {images.map((file, idx) => (
-                <div key={idx} className="preview-item">
-                  {file.name}
-                </div>
-              ))}
+        <div className="profile-scroll-area">
+          <section className="profile-photo-section">
+            <div className="avatar-container">
+              <div className="big-avatar">👤</div>
+              <button
+                className="edit-photo-txt-btn"
+                onClick={handleEditPhoto}
+                type="button"
+              >
+                사진 수정
+              </button>
             </div>
-          </div>
-        </form>
+          </section>
+
+          <section className="info-group-box">
+            <div className="info-item">
+              <label>이름</label>
+              <input type="text" defaultValue={agentData?.name || ""} />
+            </div>
+
+            <div className="info-item">
+              <label>중개사무소</label>
+              <input type="text" defaultValue={agentData?.officeName || ""} />
+            </div>
+
+            <div className="info-item">
+              <label>연락처</label>
+              <input type="text" defaultValue={agentData?.phone || ""} />
+            </div>
+
+            <div className="info-item">
+              <label>이메일(아이디)</label>
+              <input
+                type="text"
+                defaultValue={agentData?.email || ""}
+                readOnly
+              />
+            </div>
+          </section>
+
+          <section className="info-group-box">
+            <div className="briefing-header">
+              <label>내 현장 브리핑 관리</label>
+              <button
+                className="small-add-btn"
+                onClick={onGoWrite}
+                type="button"
+              >
+                + 새 글 작성
+              </button>
+            </div>
+
+            <div className="post-list-apple">
+              {loadingPosts ? (
+                <div className="no-posts">게시글을 불러오는 중입니다.</div>
+              ) : posts.length > 0 ? (
+                posts.map((post) => (
+                  <div
+                    key={post.postId}
+                    className="post-item-row"
+                    onClick={() => onOpenPostDetail?.(post.postId)}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <div className="post-info">
+                      <span className="post-title-txt">{post.title}</span>
+                      <span className="post-date-txt">
+                        {formatDate(post.createdAt)}
+                        {post.guName ? ` · ${post.guName}` : ""}
+                      </span>
+                    </div>
+                    <span className="arrow-icon">〉</span>
+                  </div>
+                ))
+              ) : (
+                <div className="no-posts">등록된 브리핑이 없습니다.</div>
+              )}
+            </div>
+          </section>
+
+          <p className="profile-footer-msg">
+            위 정보는 재개발 구역 상세 페이지에서 투자자들에게 공개됩니다.
+          </p>
+        </div>
       </div>
     </div>
   );

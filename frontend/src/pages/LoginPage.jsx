@@ -22,7 +22,7 @@ export default function LoginPage({
       if (res && res.message === "로그인 성공") {
         console.log("로그인 성공:", res);
         alert(`${res.name} 중개사님, 환영합니다!`);
-        onLoginSuccess();
+        onLoginSuccess(res);
       } else {
         alert("로그인 정보가 올바르지 않습니다.");
       }
@@ -34,7 +34,6 @@ export default function LoginPage({
     }
   };
 
-  // ✅ 수정: alert 대신 화면 전환 함수를 호출합니다.
   const handleFindAccount = (e) => {
     e.preventDefault();
     if (onGoFindAccount) {
@@ -62,6 +61,7 @@ export default function LoginPage({
               disabled={loading}
             />
           </div>
+
           <div className="input-field">
             <input
               type="password"
@@ -88,7 +88,9 @@ export default function LoginPage({
           >
             지도로 돌아가기
           </a>
+
           <div className="divider"></div>
+
           <a
             href="#"
             onClick={(e) => {
@@ -98,7 +100,9 @@ export default function LoginPage({
           >
             중개사 회원가입
           </a>
+
           <div className="divider"></div>
+
           <a href="#" onClick={handleFindAccount}>
             아이디/비밀번호 찾기
           </a>

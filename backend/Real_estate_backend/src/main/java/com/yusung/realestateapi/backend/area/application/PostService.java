@@ -3,10 +3,14 @@ package com.yusung.realestateapi.backend.area.application;
 import com.yusung.realestateapi.backend.area.domain.Agent;
 import com.yusung.realestateapi.backend.area.domain.Post;
 import com.yusung.realestateapi.backend.area.domain.PostImage;
+import com.yusung.realestateapi.backend.area.dto.PostDetailDto;
+import com.yusung.realestateapi.backend.area.dto.PostImageDto;
+import com.yusung.realestateapi.backend.area.dto.PostSummaryDto;
 import com.yusung.realestateapi.backend.area.infra.AgentRepository;
 import com.yusung.realestateapi.backend.area.infra.PostImageRepository;
 import com.yusung.realestateapi.backend.area.infra.PostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,44 +29,82 @@ public class PostService {
     private final AgentRepository agentRepository;
     private final PostImageRepository postImageRepository;
 
-    private final String uploadPath = "C:/realestate_uploads/"; // 💡 사진이 저장될 실제 폴더 경로
+    @Value("${file.upload-dir}")
+    private String uploadPath;
 
-    public Long createPost(Long agentId, String title, String content, String categoryName, List<MultipartFile> images) throws IOException {
+    public Long createPost(
+            Long agentId,
+            String title,
+            String content,
+            String categoryName,
+            String guName,
+            List<MultipartFile> images
+    ) throws IOException {
         Agent agent = agentRepository.findById(agentId)
                 .orElseThrow(() -> new IllegalArgumentException("중개사 정보를 찾을 수 없습니다."));
 
-        // 1. 게시글 저장
         Post post = Post.builder()
                 .agent(agent)
+                .areaId(null)
                 .title(title)
                 .content(content)
                 .categoryName(categoryName)
+                .guName(guName)
                 .build();
 
         postRepository.save(post);
 
-        // 2. 이미지 파일 처리
-        if (images != null) {
+        if (images != null && !images.isEmpty()) {
             File uploadDir = new File(uploadPath);
-            if (!uploadDir.exists()) uploadDir.mkdirs(); // 폴더 없으면 생성
+            if (!uploadDir.exists()) {
+                uploadDir.mkdirs();
+            }
 
             for (MultipartFile image : images) {
-                String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
-                File saveFile = new File(uploadPath + fileName);
-                image.transferTo(saveFile); // 실제 파일 저장
+                if (image.isEmpty()) continue;
 
-                // DB에 파일 경로 저장
+                String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
+                File saveFile = new File(uploadPath, fileName);
+                image.transferTo(saveFile);
+
                 PostImage postImage = PostImage.builder()
                         .post(post)
                         .imageUrl("/uploads/" + fileName)
                         .build();
+
                 postImageRepository.save(postImage);
             }
         }
+
         return post.getPostId();
     }
 
-    public List<Post> getAllPosts() {
-        return postRepository.findAll();
+    @Transactional(readOnly = true)
+    public List<PostSummaryDto> getAllPosts() {
+        return postRepository.findAllByOrderByCreatedAtDesc()
+                .stream()
+                .map(PostSummaryDto::new)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostSummaryDto> getPostsByAgent(Long agentId) {
+        return postRepository.findByAgentAgentIdOrderByCreatedAtDesc(agentId)
+                .stream()
+                .map(PostSummaryDto::new)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public PostDetailDto getPostDetail(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+
+        List<PostImageDto> imageDtos = postImageRepository.findByPostPostId(postId)
+                .stream()
+                .map(PostImageDto::new)
+                .toList();
+
+        return new PostDetailDto(post, imageDtos);
     }
 }
