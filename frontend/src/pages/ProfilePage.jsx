@@ -86,26 +86,22 @@ export default function ProfilePage({
           <section className="info-group-box">
             <div className="info-item">
               <label>이름</label>
-              <input type="text" defaultValue={agentData?.name || ""} />
+              <input type="text" value={agentData?.name || ""} readOnly />
             </div>
 
             <div className="info-item">
               <label>중개사무소</label>
-              <input type="text" defaultValue={agentData?.officeName || ""} />
+              <input type="text" value={agentData?.officeName || ""} readOnly />
             </div>
 
             <div className="info-item">
               <label>연락처</label>
-              <input type="text" defaultValue={agentData?.phone || ""} />
+              <input type="text" value={agentData?.phone || ""} readOnly />
             </div>
 
             <div className="info-item">
               <label>이메일(아이디)</label>
-              <input
-                type="text"
-                defaultValue={agentData?.email || ""}
-                readOnly
-              />
+              <input type="text" value={agentData?.email || ""} readOnly />
             </div>
           </section>
 
@@ -132,6 +128,11 @@ export default function ProfilePage({
                     onClick={() => onOpenPostDetail?.(post.postId)}
                     role="button"
                     tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        onOpenPostDetail?.(post.postId);
+                      }
+                    }}
                   >
                     <div className="post-info">
                       <span className="post-title-txt">{post.title}</span>

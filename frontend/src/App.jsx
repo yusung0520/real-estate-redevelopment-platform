@@ -155,7 +155,7 @@ export default function App() {
   if (view === "write") {
     return (
       <PostWritePage
-        agentId={brokerInfo.id}
+        agentData={brokerInfo}
         onBack={() => setView("profile")}
         onSuccess={() => setView("profile")}
       />
