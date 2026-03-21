@@ -1,13 +1,11 @@
 package com.yusung.realestateapi.backend.area.api;
 
 import com.yusung.realestateapi.backend.area.application.PostService;
+import com.yusung.realestateapi.backend.area.dto.PostWriteRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -17,23 +15,15 @@ public class PostController {
 
     private final PostService postService;
 
-    @PostMapping(value = "/write", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> writePost(
-            @RequestParam("title") String title,
-            @RequestParam("content") String content,
-            @RequestParam("categoryName") String categoryName,
-            @RequestParam("agentId") Long agentId,
-            @RequestParam("guName") String guName,
-            @RequestParam(value = "images", required = false) List<MultipartFile> images
-    ) {
+    @PostMapping("/write")
+    public ResponseEntity<?> writePost(@RequestBody PostWriteRequest request) {
         try {
             Long postId = postService.createPost(
-                    agentId,
-                    title,
-                    content,
-                    categoryName,
-                    guName,
-                    images
+                    request.getAgentId(),
+                    request.getTitle(),
+                    request.getContentHtml(),
+                    request.getCategoryName(),
+                    request.getGuName()
             );
 
             return ResponseEntity.ok(Map.of(

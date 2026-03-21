@@ -204,3 +204,12 @@
   margin-top: 14px;
   padding-bottom: 4px;
 }
+
+.toast-editor-wrapper {
+  width: 100%;
+}
+
+.toast-editor-wrapper .toastui-editor-defaultUI {
+  border-radius: 12px;
+  overflow: hidden;
+}

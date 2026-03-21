@@ -1,16 +1,71 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import Editor from "@toast-ui/editor";
+import "@toast-ui/editor/dist/toastui-editor.css";
 import "./ProfilePage.css";
 import "./PostWritePage.css";
 
+const API_BASE_URL = "http://localhost:8080";
+
 export default function PostWritePage({ agentData, onBack, onSuccess }) {
+  const editorRootRef = useRef(null);
+  const editorInstanceRef = useRef(null);
+
   const [title, setTitle] = useState("");
   const [guName, setGuName] = useState("");
-  const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const handleEditPhoto = () => {
     alert("사진 수정 기능은 다음 단계에서 연결할 예정입니다.");
   };
+
+  useEffect(() => {
+    if (!editorRootRef.current) return;
+    if (editorInstanceRef.current) return;
+
+    editorInstanceRef.current = new Editor({
+      el: editorRootRef.current,
+      height: "400px",
+      initialEditType: "wysiwyg",
+      previewStyle: "vertical",
+      initialValue: "",
+      hooks: {
+        addImageBlobHook: async (blob, callback) => {
+          try {
+            const formData = new FormData();
+            formData.append("file", blob);
+
+            const response = await fetch("/api/uploads/images", {
+              method: "POST",
+              body: formData,
+            });
+
+            if (!response.ok) {
+              throw new Error(`이미지 업로드 실패: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            // 상대경로(/uploads/xxx.png)를 절대경로로 변환
+            const imageUrl = data.url.startsWith("http")
+              ? data.url
+              : `${API_BASE_URL}${data.url}`;
+
+            callback(imageUrl, "image");
+          } catch (error) {
+            console.error("이미지 업로드 실패:", error);
+            alert("이미지 업로드에 실패했습니다.");
+          }
+        },
+      },
+    });
+
+    return () => {
+      if (editorInstanceRef.current) {
+        editorInstanceRef.current.destroy();
+        editorInstanceRef.current = null;
+      }
+    };
+  }, []);
 
   const handleSubmit = async () => {
     if (!agentData?.id) {
@@ -23,7 +78,14 @@ export default function PostWritePage({ agentData, onBack, onSuccess }) {
       return;
     }
 
-    if (!content.trim()) {
+    if (!guName.trim()) {
+      alert("자치구를 입력해주세요.");
+      return;
+    }
+
+    const contentHtml = editorInstanceRef.current?.getHTML()?.trim();
+
+    if (!contentHtml || contentHtml === "<p><br></p>") {
       alert("내용을 입력해주세요.");
       return;
     }
@@ -31,7 +93,7 @@ export default function PostWritePage({ agentData, onBack, onSuccess }) {
     try {
       setSubmitting(true);
 
-      const response = await fetch("/api/posts", {
+      const response = await fetch("/api/posts/write", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -40,7 +102,8 @@ export default function PostWritePage({ agentData, onBack, onSuccess }) {
           agentId: agentData.id,
           title: title.trim(),
           guName: guName.trim(),
-          content: content.trim(),
+          categoryName: "브리핑",
+          contentHtml,
         }),
       });
 
@@ -140,13 +203,7 @@ export default function PostWritePage({ agentData, onBack, onSuccess }) {
 
               <div className="info-item">
                 <label>브리핑 내용</label>
-                <textarea
-                  className="post-write-textarea"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="현장 분위기, 진행 단계, 투자 포인트 등을 작성해주세요."
-                  rows={10}
-                />
+                <div ref={editorRootRef} className="toast-editor-wrapper" />
               </div>
             </div>
           </section>
