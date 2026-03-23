@@ -46,6 +46,27 @@ public class PostService {
         return savedPost.getPostId();
     }
 
+    public void updatePost(
+            Long postId,
+            String title,
+            String contentHtml,
+            String categoryName,
+            String guName
+    ) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("수정할 게시글을 찾을 수 없습니다."));
+
+        post.update(title, contentHtml, categoryName, guName);
+    }
+
+    public void deletePost(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("삭제할 게시글을 찾을 수 없습니다."));
+
+        postImageRepository.deleteByPostPostId(postId);
+        postRepository.delete(post);
+    }
+
     @Transactional(readOnly = true)
     public List<PostSummaryDto> getAllPosts() {
         return postRepository.findAllByOrderByCreatedAtDesc()

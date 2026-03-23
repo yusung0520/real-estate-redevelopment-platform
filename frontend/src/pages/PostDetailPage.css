@@ -41,6 +41,37 @@
   cursor: pointer;
 }
 
+.post-detail-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.post-detail-edit-btn {
+  background: #eef2ff;
+  color: #5757e9;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.post-detail-delete-btn {
+  background: #ffe9e9;
+  color: #d93025;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.post-detail-delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .post-detail-done-btn {
   background: #5757e9;
   color: white;
@@ -98,11 +129,78 @@
   line-height: 1.4;
 }
 
-.post-detail-content {
+.post-detail-content-html {
   font-size: 15px;
   color: #1d1d1f;
   line-height: 1.8;
-  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.post-detail-content-html p {
+  margin: 0 0 1em;
+}
+
+.post-detail-content-html h1,
+.post-detail-content-html h2,
+.post-detail-content-html h3,
+.post-detail-content-html h4,
+.post-detail-content-html h5,
+.post-detail-content-html h6 {
+  margin: 1.2em 0 0.6em;
+  line-height: 1.4;
+  color: #1d1d1f;
+}
+
+.post-detail-content-html ul,
+.post-detail-content-html ol {
+  margin: 0 0 1em 1.5em;
+  padding: 0;
+}
+
+.post-detail-content-html li {
+  margin-bottom: 0.4em;
+}
+
+.post-detail-content-html blockquote {
+  margin: 1em 0;
+  padding: 12px 16px;
+  border-left: 4px solid #d2d2d7;
+  background: #f5f5f7;
+  color: #3a3a3c;
+  border-radius: 10px;
+}
+
+.post-detail-content-html figure {
+  margin: 1.2em 0;
+}
+
+.post-detail-content-html img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 16px;
+  display: block;
+}
+
+.post-detail-content-html a {
+  color: #5757e9;
+  text-decoration: underline;
+}
+
+.post-detail-content-html table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+}
+
+.post-detail-content-html th,
+.post-detail-content-html td {
+  border: 1px solid #d2d2d7;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.post-detail-content-html .image.image_resized {
+  max-width: 100%;
 }
 
 .post-detail-section-title {

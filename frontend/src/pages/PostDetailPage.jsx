@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import "./PostDetailPage.css";
 
-export default function PostDetailPage({ postId, onBack }) {
+export default function PostDetailPage({ postId, onBack, onDeleted, onEdit }) {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const fetchPostDetail = async () => {
@@ -52,6 +53,51 @@ export default function PostDetailPage({ postId, onBack }) {
     return `http://localhost:8080${imageUrl}`;
   };
 
+  const handleDelete = async () => {
+    if (!postId) return;
+
+    const confirmed = window.confirm("이 게시글을 삭제하시겠습니까?");
+    if (!confirmed) return;
+
+    try {
+      setDeleting(true);
+
+      const response = await fetch(`/api/posts/${postId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        let errorMessage = `게시글 삭제 실패: ${response.status}`;
+
+        try {
+          const errorData = await response.json();
+          if (errorData?.message) {
+            errorMessage = errorData.message;
+          }
+        } catch {
+          // 응답 본문이 JSON이 아니어도 기본 메시지 유지
+        }
+
+        throw new Error(errorMessage);
+      }
+
+      alert("게시글이 삭제되었습니다.");
+
+      if (onDeleted) {
+        onDeleted(postId);
+      } else if (onBack) {
+        onBack();
+      }
+    } catch (error) {
+      console.error("게시글 삭제 실패:", error);
+      alert(error.message || "게시글 삭제 중 오류가 발생했습니다.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const contentHtml = post?.contentHtml || post?.content || "";
+
   if (loading) {
     return (
       <div className="post-detail-page-wrapper">
@@ -64,15 +110,20 @@ export default function PostDetailPage({ postId, onBack }) {
             >
               ✕
             </button>
+
             <h1>브리핑 상세</h1>
-            <button
-              className="post-detail-done-btn"
-              onClick={onBack}
-              type="button"
-            >
-              완료
-            </button>
+
+            <div className="post-detail-header-actions">
+              <button
+                className="post-detail-done-btn"
+                onClick={onBack}
+                type="button"
+              >
+                완료
+              </button>
+            </div>
           </header>
+
           <div className="post-detail-body loading-text">
             게시글을 불러오는 중입니다.
           </div>
@@ -93,15 +144,20 @@ export default function PostDetailPage({ postId, onBack }) {
             >
               ✕
             </button>
+
             <h1>브리핑 상세</h1>
-            <button
-              className="post-detail-done-btn"
-              onClick={onBack}
-              type="button"
-            >
-              완료
-            </button>
+
+            <div className="post-detail-header-actions">
+              <button
+                className="post-detail-done-btn"
+                onClick={onBack}
+                type="button"
+              >
+                완료
+              </button>
+            </div>
           </header>
+
           <div className="post-detail-body loading-text">
             게시글을 찾을 수 없습니다.
           </div>
@@ -121,14 +177,35 @@ export default function PostDetailPage({ postId, onBack }) {
           >
             ✕
           </button>
+
           <h1>브리핑 상세</h1>
-          <button
-            className="post-detail-done-btn"
-            onClick={onBack}
-            type="button"
-          >
-            완료
-          </button>
+
+          <div className="post-detail-header-actions">
+            <button
+              className="post-detail-edit-btn"
+              onClick={() => onEdit?.(postId)}
+              type="button"
+            >
+              수정
+            </button>
+
+            <button
+              className="post-detail-delete-btn"
+              onClick={handleDelete}
+              type="button"
+              disabled={deleting}
+            >
+              {deleting ? "삭제중" : "삭제"}
+            </button>
+
+            <button
+              className="post-detail-done-btn"
+              onClick={onBack}
+              type="button"
+            >
+              완료
+            </button>
+          </div>
         </header>
 
         <div className="post-detail-body">
@@ -152,8 +229,12 @@ export default function PostDetailPage({ postId, onBack }) {
           </div>
 
           <div className="post-detail-content-box">
-            <h2 className="post-detail-title">{post.title}</h2>
-            <p className="post-detail-content">{post.content}</p>
+            <h2 className="post-detail-title">{post.title || "-"}</h2>
+
+            <div
+              className="post-detail-content-html"
+              dangerouslySetInnerHTML={{ __html: contentHtml }}
+            />
           </div>
 
           {post.images && post.images.length > 0 && (

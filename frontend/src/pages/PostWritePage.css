@@ -31,8 +31,7 @@
   box-sizing: border-box;
 }
 
-.write-form-area input::placeholder,
-.post-write-textarea::placeholder {
+.write-form-area input::placeholder {
   color: #aeaeb2;
 }
 
@@ -40,24 +39,105 @@
   border-bottom: 1px solid #5e5ce6;
 }
 
-.post-write-textarea {
+/* CKEditor wrapper */
+.ckeditor-wrapper {
   width: 100%;
-  min-height: 220px;
-  box-sizing: border-box;
   border: 1px solid #d2d2d7;
   border-radius: 16px;
   background: #ffffff;
-  padding: 14px 16px;
-  font-size: 16px;
-  line-height: 1.6;
-  color: #1d1d1f;
-  outline: none;
-  resize: vertical;
-  font-family: inherit;
+  overflow: hidden;
+  box-sizing: border-box;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-.post-write-textarea:focus {
+.ckeditor-wrapper:focus-within {
   border-color: #5e5ce6;
+  box-shadow: 0 0 0 3px rgba(94, 92, 230, 0.08);
+}
+
+/* CKEditor 전체 */
+.ckeditor-wrapper .ck.ck-editor {
+  width: 100%;
+}
+
+/* 툴바 */
+.ckeditor-wrapper .ck.ck-toolbar {
+  border: none;
+  border-bottom: 1px solid #e5e5ea;
+  background: #f9f9fb;
+  padding: 8px 10px;
+}
+
+.ckeditor-wrapper .ck.ck-toolbar .ck-button {
+  border-radius: 10px;
+}
+
+/* 편집 영역 바깥 */
+.ckeditor-wrapper .ck.ck-editor__main > .ck-editor__editable {
+  border: none;
+  box-shadow: none !important;
+  background: #ffffff;
+}
+
+/* 편집 영역 내부 */
+.ckeditor-wrapper .ck-editor__editable_inline {
+  min-height: 320px;
+  padding: 16px 18px;
+  font-size: 16px;
+  line-height: 1.7;
+  color: #1d1d1f;
+}
+
+/* placeholder */
+.ckeditor-wrapper .ck.ck-editor__editable_inline.ck-placeholder::before {
+  color: #aeaeb2;
+  font-style: normal;
+}
+
+/* 본문 안쪽 요소들 조금 자연스럽게 */
+.ckeditor-wrapper .ck-content p {
+  margin: 0 0 1em;
+}
+
+.ckeditor-wrapper .ck-content h1,
+.ckeditor-wrapper .ck-content h2,
+.ckeditor-wrapper .ck-content h3 {
+  margin: 1.2em 0 0.6em;
+  font-weight: 700;
+  color: #1d1d1f;
+}
+
+.ckeditor-wrapper .ck-content ul,
+.ckeditor-wrapper .ck-content ol {
+  margin: 0 0 1em 1.2em;
+}
+
+.ckeditor-wrapper .ck-content blockquote {
+  margin: 1em 0;
+  padding-left: 16px;
+  border-left: 4px solid #d2d2d7;
+  color: #636366;
+}
+
+/* 이미지가 들어갔을 때 너무 커지지 않게 */
+.ckeditor-wrapper .ck-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
+
+/* 표 스타일 */
+.ckeditor-wrapper .ck-content table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ckeditor-wrapper .ck-content table td,
+.ckeditor-wrapper .ck-content table th {
+  border: 1px solid #d2d2d7;
+  padding: 8px 10px;
 }
 
 .profile-scroll-area {
@@ -107,10 +187,14 @@
     font-size: 16px;
   }
 
-  .post-write-textarea {
-    min-height: 180px;
+  .ckeditor-wrapper .ck-editor__editable_inline {
+    min-height: 240px;
     font-size: 15px;
-    padding: 12px 14px;
+    padding: 14px 14px;
+  }
+
+  .ckeditor-wrapper .ck.ck-toolbar {
+    padding: 6px 8px;
   }
 
   .info-group-box .briefing-header label {

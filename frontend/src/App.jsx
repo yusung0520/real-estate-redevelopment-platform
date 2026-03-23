@@ -143,7 +143,10 @@ export default function App() {
       <ProfilePage
         agentData={brokerInfo}
         onBack={() => setView("map")}
-        onGoWrite={() => setView("write")}
+        onGoWrite={() => {
+          setSelectedPostId(null);
+          setView("write");
+        }}
         onOpenPostDetail={(postId) => {
           setSelectedPostId(postId);
           setView("postDetail");
@@ -155,9 +158,28 @@ export default function App() {
   if (view === "write") {
     return (
       <PostWritePage
+        mode="write"
+        postId={null}
         agentData={brokerInfo}
         onBack={() => setView("profile")}
-        onSuccess={() => setView("profile")}
+        onSuccess={() => {
+          setSelectedPostId(null);
+          setView("profile");
+        }}
+      />
+    );
+  }
+
+  if (view === "edit") {
+    return (
+      <PostWritePage
+        mode="edit"
+        postId={selectedPostId}
+        agentData={brokerInfo}
+        onBack={() => setView("postDetail")}
+        onSuccess={() => {
+          setView("postDetail");
+        }}
       />
     );
   }
@@ -167,6 +189,14 @@ export default function App() {
       <PostDetailPage
         postId={selectedPostId}
         onBack={() => setView("profile")}
+        onDeleted={() => {
+          setSelectedPostId(null);
+          setView("profile");
+        }}
+        onEdit={(postId) => {
+          setSelectedPostId(postId);
+          setView("edit");
+        }}
       />
     );
   }

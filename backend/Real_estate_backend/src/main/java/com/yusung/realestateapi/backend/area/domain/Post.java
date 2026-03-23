@@ -23,7 +23,7 @@ public class Post {
     private Agent agent;
 
     @Column(name = "area_id")
-    private Long areaId; // 지금은 nullable 상태로 두고, 나중에 areas_v3 기준으로 쓸 수 있게 유지
+    private Long areaId;
 
     @Column(nullable = false, length = 200)
     private String title;
@@ -48,6 +48,13 @@ public class Post {
     public Post(Agent agent, Long areaId, String title, String content, String categoryName, String guName) {
         this.agent = agent;
         this.areaId = areaId;
+        this.title = title;
+        this.content = content;
+        this.categoryName = categoryName;
+        this.guName = guName;
+    }
+
+    public void update(String title, String content, String categoryName, String guName) {
         this.title = title;
         this.content = content;
         this.categoryName = categoryName;

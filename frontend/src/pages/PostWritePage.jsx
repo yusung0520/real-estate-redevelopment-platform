@@ -1,23 +1,111 @@
+<<<<<<< HEAD
 import React, { useEffect, useRef, useState } from "react";
 import Editor from "@toast-ui/editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
+=======
+import React, { useMemo, useState } from "react";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import {
+  ClassicEditor,
+  Essentials,
+  Paragraph,
+  Bold,
+  Italic,
+  Underline,
+  Strikethrough,
+  Heading,
+  Link,
+  List,
+  Font,
+  Alignment,
+  Image,
+  ImageToolbar,
+  ImageCaption,
+  ImageStyle,
+  ImageResize,
+  ImageUpload,
+  Table,
+  TableToolbar,
+  BlockQuote,
+} from "ckeditor5";
+
+import koTranslations from "ckeditor5/translations/ko.js";
+import "ckeditor5/ckeditor5.css";
+>>>>>>> 8f122b2 (글쓰기 페이지 기능 추가 및 수정)
 import "./ProfilePage.css";
 import "./PostWritePage.css";
 
 const API_BASE_URL = "http://localhost:8080";
 
+<<<<<<< HEAD
+=======
+/**
+ * CKEditor 5 커스텀 업로드 어댑터
+ * 기존 Toast UI의 addImageBlobHook 역할을 대신함
+ */
+class CustomUploadAdapter {
+  constructor(loader) {
+    this.loader = loader;
+  }
+
+  async upload() {
+    const file = await this.loader.file;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch("/api/uploads/images", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`이미지 업로드 실패: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    const imageUrl = data.url?.startsWith("http")
+      ? data.url
+      : `${API_BASE_URL}${data.url}`;
+
+    return {
+      default: imageUrl,
+    };
+  }
+
+  abort() {
+    // 필요하면 나중에 AbortController 연결 가능
+  }
+}
+
+/**
+ * CKEditor에 업로드 어댑터 연결
+ */
+function CustomUploadAdapterPlugin(editor) {
+  editor.plugins.get("FileRepository").createUploadAdapter = (loader) => {
+    return new CustomUploadAdapter(loader);
+  };
+}
+
+>>>>>>> 8f122b2 (글쓰기 페이지 기능 추가 및 수정)
 export default function PostWritePage({ agentData, onBack, onSuccess }) {
   const editorRootRef = useRef(null);
   const editorInstanceRef = useRef(null);
 
   const [title, setTitle] = useState("");
   const [guName, setGuName] = useState("");
+<<<<<<< HEAD
+=======
+  const [contentHtml, setContentHtml] = useState("");
+>>>>>>> 8f122b2 (글쓰기 페이지 기능 추가 및 수정)
   const [submitting, setSubmitting] = useState(false);
 
   const handleEditPhoto = () => {
     alert("사진 수정 기능은 다음 단계에서 연결할 예정입니다.");
   };
 
+<<<<<<< HEAD
   useEffect(() => {
     if (!editorRootRef.current) return;
     if (editorInstanceRef.current) return;
@@ -64,6 +152,76 @@ export default function PostWritePage({ agentData, onBack, onSuccess }) {
         editorInstanceRef.current.destroy();
         editorInstanceRef.current = null;
       }
+=======
+  const editorConfig = useMemo(() => {
+    return {
+      licenseKey: "GPL",
+      plugins: [
+        Essentials,
+        Paragraph,
+        Bold,
+        Italic,
+        Underline,
+        Strikethrough,
+        Heading,
+        Link,
+        List,
+        Font,
+        Alignment,
+        Image,
+        ImageToolbar,
+        ImageCaption,
+        ImageStyle,
+        ImageResize,
+        ImageUpload,
+        Table,
+        TableToolbar,
+        BlockQuote,
+      ],
+      extraPlugins: [CustomUploadAdapterPlugin],
+      toolbar: [
+        "undo",
+        "redo",
+        "|",
+        "heading",
+        "|",
+        "fontSize",
+        "fontFamily",
+        "fontColor",
+        "fontBackgroundColor",
+        "|",
+        "bold",
+        "italic",
+        "underline",
+        "strikethrough",
+        "|",
+        "alignment",
+        "|",
+        "bulletedList",
+        "numberedList",
+        "|",
+        "link",
+        "insertTable",
+        "uploadImage",
+        "blockQuote",
+      ],
+      image: {
+        toolbar: [
+          "imageStyle:inline",
+          "imageStyle:block",
+          "imageStyle:side",
+          "|",
+          "toggleImageCaption",
+          "imageTextAlternative",
+        ],
+      },
+      table: {
+        contentToolbar: ["tableColumn", "tableRow", "mergeTableCells"],
+      },
+      language: "ko",
+      translations: [koTranslations],
+      placeholder: "브리핑 내용을 입력해주세요.",
+>>>>>>> 8f122b2 (글쓰기 페이지 기능 추가 및 수정)
     };
   }, []);
 
@@ -83,9 +241,19 @@ export default function PostWritePage({ agentData, onBack, onSuccess }) {
       return;
     }
 
+<<<<<<< HEAD
     const contentHtml = editorInstanceRef.current?.getHTML()?.trim();
 
     if (!contentHtml || contentHtml === "<p><br></p>") {
+=======
+    const trimmedContent = contentHtml.trim();
+
+    if (
+      !trimmedContent ||
+      trimmedContent === "<p>&nbsp;</p>" ||
+      trimmedContent === "<p><br></p>"
+    ) {
+>>>>>>> 8f122b2 (글쓰기 페이지 기능 추가 및 수정)
       alert("내용을 입력해주세요.");
       return;
     }
@@ -103,7 +271,11 @@ export default function PostWritePage({ agentData, onBack, onSuccess }) {
           title: title.trim(),
           guName: guName.trim(),
           categoryName: "브리핑",
+<<<<<<< HEAD
           contentHtml,
+=======
+          contentHtml: trimmedContent,
+>>>>>>> 8f122b2 (글쓰기 페이지 기능 추가 및 수정)
         }),
       });
 
@@ -203,7 +375,21 @@ export default function PostWritePage({ agentData, onBack, onSuccess }) {
 
               <div className="info-item">
                 <label>브리핑 내용</label>
+<<<<<<< HEAD
                 <div ref={editorRootRef} className="toast-editor-wrapper" />
+=======
+                <div className="ckeditor-wrapper">
+                  <CKEditor
+                    editor={ClassicEditor}
+                    config={editorConfig}
+                    data={contentHtml}
+                    onChange={(event, editor) => {
+                      const data = editor.getData();
+                      setContentHtml(data);
+                    }}
+                  />
+                </div>
+>>>>>>> 8f122b2 (글쓰기 페이지 기능 추가 및 수정)
               </div>
             </div>
           </section>
