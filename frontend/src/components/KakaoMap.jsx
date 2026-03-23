@@ -18,8 +18,11 @@ function getStageColor(stage) {
 function parseGeoJsonToPaths(polygonGeojson, kakao) {
   if (!polygonGeojson) return [];
   let gj = polygonGeojson;
+
   try {
-    if (typeof polygonGeojson === "string") gj = JSON.parse(polygonGeojson);
+    if (typeof polygonGeojson === "string") {
+      gj = JSON.parse(polygonGeojson);
+    }
   } catch {
     return [];
   }
@@ -32,16 +35,21 @@ function parseGeoJsonToPaths(polygonGeojson, kakao) {
       .filter((pt) => Array.isArray(pt) && pt.length >= 2)
       .map(([lng, lat]) => new kakao.maps.LatLng(lat, lng));
 
-  if (gj.type === "Polygon") return [toLatLngRing(gj.coordinates?.[0] || [])];
+  if (gj.type === "Polygon") {
+    return [toLatLngRing(gj.coordinates?.[0] || [])];
+  }
+
   if (gj.type === "MultiPolygon") {
     return (gj.coordinates || []).map((poly) => toLatLngRing(poly[0] || []));
   }
+
   return [];
 }
 
 export default function KakaoMap({ onAreaClick, center }) {
   const [areas, setAreas] = useState([]);
   const [mapReady, setMapReady] = useState(false);
+
   const mapRef = useRef(null);
   const containerRef = useRef(null);
   const polygonsRef = useRef([]);
@@ -79,8 +87,10 @@ export default function KakaoMap({ onAreaClick, center }) {
 
   useEffect(() => {
     if (!mapReady || !mapRef.current || !center || !center.lat) return;
+
     const kakao = window.kakao;
     const moveLatLon = new kakao.maps.LatLng(center.lat, center.lng);
+
     mapRef.current.panTo(moveLatLon);
     mapRef.current.setLevel(5);
 
@@ -88,7 +98,10 @@ export default function KakaoMap({ onAreaClick, center }) {
       const target = polygonsRef.current.find(
         (p) => p.areaId === center.targetId,
       );
-      if (target) highlightPolygon(target);
+
+      if (target) {
+        highlightPolygon(target);
+      }
     }
   }, [center, mapReady]);
 
@@ -106,24 +119,27 @@ export default function KakaoMap({ onAreaClick, center }) {
       });
     }
 
-    // 2. 새로운 선택 강조 (Midnight Navy 테두리)
+    // 2. 새로운 선택 강조
     polygon.setOptions({
-      strokeWeight: 3, // 사용자님이 선호하시는 깔끔한 두께
-      strokeColor: "#5757e9", // ✅ 애플 공식 미드나이트 남색 (거의 검정에 가까운 아주 진한 남색)
-      strokeOpacity: 1, // 뚜렷하게 강조
-      fillColor: polygon.originalColor, // 안쪽 면색은 원래 색상 유지
-      fillOpacity: 0.3, // 선택되었으므로 가독성을 위해 살짝 강조
-      zIndex: 100, // 최상단 배치
+      strokeWeight: 3,
+      strokeColor: "#5757e9",
+      strokeOpacity: 1,
+      fillColor: polygon.originalColor,
+      fillOpacity: 0.3,
+      zIndex: 100,
     });
+
     selectedPolygonRef.current = polygon;
   };
 
   useEffect(() => {
     if (!window.kakao || !window.kakao.maps || !mapReady || areas.length === 0)
       return;
+
     const kakao = window.kakao;
     const map = mapRef.current;
 
+    // 기존 폴리곤 제거
     polygonsRef.current.forEach((p) => p.setMap(null));
     polygonsRef.current = [];
 
@@ -149,7 +165,16 @@ export default function KakaoMap({ onAreaClick, center }) {
 
         kakao.maps.event.addListener(polygon, "click", () => {
           highlightPolygon(polygon);
-          if (a.areaId && onAreaClick) onAreaClick(a.areaId);
+
+          console.log("===== 클릭한 구역 데이터 시작 =====");
+          console.log("클릭한 area 전체:", a);
+          console.log("guName 확인:", a?.guName);
+          console.log("gu_name 확인:", a?.gu_name);
+          console.log("===== 클릭한 구역 데이터 끝 =====");
+
+          if (a.areaId && onAreaClick) {
+            onAreaClick(a.areaId);
+          }
         });
       });
     });
