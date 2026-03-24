@@ -11,5 +11,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     List<Post> findByAgentAgentIdOrderByCreatedAtDesc(Long agentId);
 
+    List<Post> findBySigunguCdOrderByCreatedAtDesc(String sigunguCd);
+
+    List<Post> findBySigunguCdAndCategoryNameOrderByCreatedAtDesc(String sigunguCd, String categoryName);
+
     List<Post> findAllByOrderByCreatedAtDesc();
 }

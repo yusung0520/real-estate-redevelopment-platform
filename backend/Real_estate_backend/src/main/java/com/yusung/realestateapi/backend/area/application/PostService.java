@@ -84,6 +84,14 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
+    public List<PostSummaryDto> getPostsBySigunguCd(String sigunguCd) {
+        return postRepository.findBySigunguCdAndCategoryNameOrderByCreatedAtDesc(sigunguCd, "브리핑")
+                .stream()
+                .map(PostSummaryDto::new)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public PostDetailDto getPostDetail(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));

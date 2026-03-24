@@ -105,9 +105,8 @@ export default function KakaoMap({ onAreaClick, center }) {
     }
   }, [center, mapReady]);
 
-  // ⭐ [디자인 반영] 진한 남색(Midnight) 테두리 강조 함수
+  // ⭐ 선택 폴리곤 강조
   const highlightPolygon = (polygon) => {
-    // 1. 이전 선택 스타일 원복
     if (selectedPolygonRef.current) {
       selectedPolygonRef.current.setOptions({
         strokeWeight: 1,
@@ -119,7 +118,6 @@ export default function KakaoMap({ onAreaClick, center }) {
       });
     }
 
-    // 2. 새로운 선택 강조
     polygon.setOptions({
       strokeWeight: 3,
       strokeColor: "#5757e9",
@@ -168,12 +166,16 @@ export default function KakaoMap({ onAreaClick, center }) {
 
           console.log("===== 클릭한 구역 데이터 시작 =====");
           console.log("클릭한 area 전체:", a);
-          console.log("guName 확인:", a?.guName);
-          console.log("gu_name 확인:", a?.gu_name);
+          console.log("sigunguCd 확인:", a?.sigunguCd);
           console.log("===== 클릭한 구역 데이터 끝 =====");
 
-          if (a.areaId && onAreaClick) {
-            onAreaClick(a.areaId);
+          if (onAreaClick) {
+            onAreaClick({
+              areaId: a.areaId,
+              name: a.name,
+              stage: a.stage,
+              sigunguCd: a.sigunguCd,
+            });
           }
         });
       });

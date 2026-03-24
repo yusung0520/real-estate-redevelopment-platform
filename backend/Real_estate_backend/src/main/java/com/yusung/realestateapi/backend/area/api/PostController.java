@@ -76,6 +76,11 @@ public class PostController {
         return ResponseEntity.ok(postService.getPostsByAgent(agentId));
     }
 
+    @GetMapping("/by-sigungu")
+    public ResponseEntity<?> getPostsBySigungu(@RequestParam("sigunguCd") String sigunguCd) {
+        return ResponseEntity.ok(postService.getPostsBySigunguCd(sigunguCd));
+    }
+
     @GetMapping("/{postId}")
     public ResponseEntity<?> getPostDetail(@PathVariable Long postId) {
         try {

@@ -13,6 +13,7 @@ import "./App.css";
 export default function App() {
   const [view, setView] = useState("map");
   const [selectedAreaId, setSelectedAreaId] = useState(null);
+  const [selectedArea, setSelectedArea] = useState(null);
   const [selectedPostId, setSelectedPostId] = useState(null);
   const [mapCenter, setMapCenter] = useState(null);
   const [isBroker, setIsBroker] = useState(false);
@@ -20,6 +21,8 @@ export default function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [briefings, setBriefings] = useState([]);
+  const [loadingBriefings, setLoadingBriefings] = useState(false);
 
   const [brokerInfo, setBrokerInfo] = useState({
     id: null,
@@ -62,8 +65,44 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  const handleSelectResult = (area) => {
-    setSelectedAreaId(area.areaId || area.id);
+  const fetchBriefingsBySigungu = async (sigunguCd) => {
+    if (!sigunguCd) {
+      setBriefings([]);
+      return;
+    }
+
+    try {
+      setLoadingBriefings(true);
+
+      const response = await fetch(
+        `/api/posts/by-sigungu?sigunguCd=${encodeURIComponent(sigunguCd)}`,
+      );
+
+      if (!response.ok) {
+        throw new Error(`브리핑 조회 실패: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setBriefings(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("브리핑 조회 실패:", error);
+      setBriefings([]);
+    } finally {
+      setLoadingBriefings(false);
+    }
+  };
+
+  const handleSelectResult = async (area) => {
+    const areaId = area.areaId || area.id;
+
+    setSelectedAreaId(areaId);
+    setSelectedArea({
+      areaId,
+      name: area.name,
+      stage: area.stage,
+      sigunguCd: area.sigunguCd || null,
+    });
+
     setSearchTerm(area.name);
     setShowDropdown(false);
 
@@ -71,16 +110,27 @@ export default function App() {
       setMapCenter({
         lat: Number(area.centerLat),
         lng: Number(area.centerLng),
-        targetId: area.areaId || area.id,
+        targetId: areaId,
       });
     }
+
+    await fetchBriefingsBySigungu(area.sigunguCd);
+  };
+
+  const handleAreaClick = async (area) => {
+    setSelectedArea(area);
+    setSelectedAreaId(area.areaId);
+    setSearchTerm(area.name || "");
+    await fetchBriefingsBySigungu(area.sigunguCd);
   };
 
   const handleLoginButtonClick = () => {
     if (isBroker) {
       setIsBroker(false);
       setSelectedAreaId(null);
+      setSelectedArea(null);
       setSelectedPostId(null);
+      setBriefings([]);
       setView("map");
       setBrokerInfo({
         id: null,
@@ -299,10 +349,109 @@ export default function App() {
                   isBroker={isBroker}
                   onExit={() => {
                     setSelectedAreaId(null);
+                    setSelectedArea(null);
+                    setBriefings([]);
                     setSearchTerm("");
                     setMapCenter(null);
                   }}
                 />
+
+                <div
+                  style={{
+                    padding: "20px",
+                    borderTop: "1px solid #e5e5ea",
+                    background: "#fff",
+                  }}
+                >
+                  <h3
+                    style={{
+                      fontSize: "18px",
+                      fontWeight: 700,
+                      marginBottom: "14px",
+                    }}
+                  >
+                    전문가 현장 브리핑
+                  </h3>
+
+                  {selectedArea && (
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "#666",
+                        marginBottom: "12px",
+                      }}
+                    >
+                      선택된 구역: {selectedArea.name}
+                    </p>
+                  )}
+
+                  {loadingBriefings && (
+                    <p style={{ fontSize: "14px", color: "#666" }}>
+                      브리핑을 불러오는 중입니다...
+                    </p>
+                  )}
+
+                  {!loadingBriefings && briefings.length === 0 && (
+                    <div
+                      style={{
+                        border: "1px dashed #d1d1d6",
+                        borderRadius: "12px",
+                        padding: "16px",
+                        color: "#8e8e93",
+                        fontSize: "14px",
+                      }}
+                    >
+                      해당 자치구에 등록된 브리핑이 없습니다.
+                    </div>
+                  )}
+
+                  {!loadingBriefings && briefings.length > 0 && (
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "12px",
+                      }}
+                    >
+                      {briefings.map((post) => (
+                        <div
+                          key={post.postId}
+                          style={{
+                            border: "1px solid #e5e5ea",
+                            borderRadius: "14px",
+                            padding: "14px",
+                            background: "#fafafa",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => {
+                            setSelectedPostId(post.postId);
+                            setView("postDetail");
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontWeight: 700,
+                              fontSize: "15px",
+                              marginBottom: "6px",
+                              color: "#111",
+                            }}
+                          >
+                            {post.title}
+                          </div>
+
+                          <div
+                            style={{
+                              fontSize: "12px",
+                              color: "#8e8e93",
+                            }}
+                          >
+                            {post.createdAt || "작성일 정보 없음"}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="sidebar-placeholder">
@@ -317,7 +466,7 @@ export default function App() {
 
         <main className="map-wrapper">
           <KakaoMap
-            onAreaClick={(id) => setSelectedAreaId(id)}
+            onAreaClick={handleAreaClick}
             center={mapCenter}
             selectedAreaId={selectedAreaId}
           />
