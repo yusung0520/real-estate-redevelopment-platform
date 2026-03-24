@@ -31,6 +31,39 @@ import "./PostWritePage.css";
 
 const API_BASE_URL = "http://localhost:8080";
 
+const SIGUNGU_OPTIONS = [
+  { label: "종로구", value: "11110" },
+  { label: "중구", value: "11140" },
+  { label: "용산구", value: "11170" },
+  { label: "성동구", value: "11200" },
+  { label: "광진구", value: "11215" },
+  { label: "동대문구", value: "11230" },
+  { label: "중랑구", value: "11260" },
+  { label: "성북구", value: "11290" },
+  { label: "강북구", value: "11305" },
+  { label: "도봉구", value: "11320" },
+  { label: "노원구", value: "11350" },
+  { label: "은평구", value: "11380" },
+  { label: "서대문구", value: "11410" },
+  { label: "마포구", value: "11440" },
+  { label: "양천구", value: "11470" },
+  { label: "강서구", value: "11500" },
+  { label: "구로구", value: "11530" },
+  { label: "금천구", value: "11545" },
+  { label: "영등포구", value: "11560" },
+  { label: "동작구", value: "11590" },
+  { label: "관악구", value: "11620" },
+  { label: "서초구", value: "11650" },
+  { label: "강남구", value: "11680" },
+  { label: "송파구", value: "11710" },
+  { label: "강동구", value: "11740" },
+];
+
+function getSigunguLabel(sigunguCd) {
+  const found = SIGUNGU_OPTIONS.find((option) => option.value === sigunguCd);
+  return found ? found.label : "";
+}
+
 class CustomUploadAdapter {
   constructor(loader) {
     this.loader = loader;
@@ -79,7 +112,7 @@ export default function PostWritePage({
   postId = null,
 }) {
   const [title, setTitle] = useState("");
-  const [guName, setGuName] = useState("");
+  const [sigunguCd, setSigunguCd] = useState("");
   const [contentHtml, setContentHtml] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [loadingPost, setLoadingPost] = useState(false);
@@ -99,7 +132,7 @@ export default function PostWritePage({
         const data = await response.json();
 
         setTitle(data.title || "");
-        setGuName(data.guName || "");
+        setSigunguCd(data.sigunguCd || "");
         setContentHtml(data.contentHtml || data.content || "");
       } catch (error) {
         console.error("수정할 게시글 조회 실패:", error);
@@ -198,8 +231,8 @@ export default function PostWritePage({
       return;
     }
 
-    if (!guName.trim()) {
-      alert("자치구를 입력해주세요.");
+    if (!sigunguCd) {
+      alert("자치구를 선택해주세요.");
       return;
     }
 
@@ -218,24 +251,25 @@ export default function PostWritePage({
       setSubmitting(true);
 
       const url = mode === "edit" ? `/api/posts/${postId}` : `/api/posts/write`;
-
       const method = mode === "edit" ? "PUT" : "POST";
 
       const requestBody =
         mode === "edit"
           ? {
               title: title.trim(),
-              guName: guName.trim(),
+              sigunguCd,
               categoryName: "브리핑",
               contentHtml: trimmedContent,
             }
           : {
               agentId: agentData.id,
               title: title.trim(),
-              guName: guName.trim(),
+              sigunguCd,
               categoryName: "브리핑",
               contentHtml: trimmedContent,
             };
+
+      console.log("게시글 저장 요청:", requestBody);
 
       const response = await fetch(url, {
         method,
@@ -366,13 +400,29 @@ export default function PostWritePage({
 
               <div className="info-item">
                 <label>자치구</label>
-                <input
-                  type="text"
-                  value={guName}
-                  onChange={(e) => setGuName(e.target.value)}
-                  placeholder="예: 동작구"
+                <select
+                  value={sigunguCd}
+                  onChange={(e) => setSigunguCd(e.target.value)}
                   disabled={loadingPost}
-                />
+                >
+                  <option value="">자치구를 선택하세요</option>
+                  {SIGUNGU_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                {sigunguCd && (
+                  <small
+                    style={{
+                      marginTop: "6px",
+                      display: "block",
+                      color: "#666",
+                    }}
+                  >
+                    선택된 자치구: {getSigunguLabel(sigunguCd)} ({sigunguCd})
+                  </small>
+                )}
               </div>
 
               <div className="info-item">

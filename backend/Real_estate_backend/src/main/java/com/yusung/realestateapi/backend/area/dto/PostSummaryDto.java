@@ -12,7 +12,7 @@ public class PostSummaryDto {
     private final Long agentId;
     private final String title;
     private final String categoryName;
-    private final String guName;
+    private final String sigunguCd;
     private final LocalDateTime createdAt;
 
     public PostSummaryDto(Post post) {
@@ -20,7 +20,7 @@ public class PostSummaryDto {
         this.agentId = post.getAgent().getAgentId();
         this.title = post.getTitle();
         this.categoryName = post.getCategoryName();
-        this.guName = post.getGuName();
+        this.sigunguCd = post.getSigunguCd();
         this.createdAt = post.getCreatedAt();
     }
 }

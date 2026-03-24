@@ -15,7 +15,7 @@ public class PostDetailDto {
     private final String title;
     private final String content;
     private final String categoryName;
-    private final String guName;
+    private final String sigunguCd;
     private final LocalDateTime createdAt;
     private final List<PostImageDto> images;
 
@@ -26,7 +26,7 @@ public class PostDetailDto {
         this.title = post.getTitle();
         this.content = post.getContent();
         this.categoryName = post.getCategoryName();
-        this.guName = post.getGuName();
+        this.sigunguCd = post.getSigunguCd();
         this.createdAt = post.getCreatedAt();
         this.images = images;
     }

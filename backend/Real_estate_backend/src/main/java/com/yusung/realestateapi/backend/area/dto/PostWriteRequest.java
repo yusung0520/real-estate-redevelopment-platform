@@ -8,7 +8,7 @@ import lombok.Setter;
 public class PostWriteRequest {
     private Long agentId;
     private String title;
-    private String guName;
+    private String sigunguCd;
     private String categoryName;
     private String contentHtml;
 }

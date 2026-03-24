@@ -23,7 +23,7 @@ public class PostController {
                     request.getTitle(),
                     request.getContentHtml(),
                     request.getCategoryName(),
-                    request.getGuName()
+                    request.getSigunguCd()
             );
 
             return ResponseEntity.ok(Map.of(
@@ -48,7 +48,7 @@ public class PostController {
                     request.getTitle(),
                     request.getContentHtml(),
                     request.getCategoryName(),
-                    request.getGuName()
+                    request.getSigunguCd()
             );
 
             return ResponseEntity.ok(Map.of(

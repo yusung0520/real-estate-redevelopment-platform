@@ -34,8 +34,8 @@ public class Post {
     @Column(name = "category_name")
     private String categoryName;
 
-    @Column(name = "gu_name", length = 50)
-    private String guName;
+    @Column(name = "sigungu_cd", length = 10)
+    private String sigunguCd;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostImage> images = new ArrayList<>();
@@ -45,19 +45,19 @@ public class Post {
     private LocalDateTime createdAt;
 
     @Builder
-    public Post(Agent agent, Long areaId, String title, String content, String categoryName, String guName) {
+    public Post(Agent agent, Long areaId, String title, String content, String categoryName, String sigunguCd) {
         this.agent = agent;
         this.areaId = areaId;
         this.title = title;
         this.content = content;
         this.categoryName = categoryName;
-        this.guName = guName;
+        this.sigunguCd = sigunguCd;
     }
 
-    public void update(String title, String content, String categoryName, String guName) {
+    public void update(String title, String content, String categoryName, String sigunguCd) {
         this.title = title;
         this.content = content;
         this.categoryName = categoryName;
-        this.guName = guName;
+        this.sigunguCd = sigunguCd;
     }
 }

@@ -28,7 +28,7 @@ public class PostService {
             String title,
             String contentHtml,
             String categoryName,
-            String guName
+            String sigunguCd
     ) {
         Agent agent = agentRepository.findById(agentId)
                 .orElseThrow(() -> new IllegalArgumentException("중개사 정보를 찾을 수 없습니다."));
@@ -39,7 +39,7 @@ public class PostService {
                 .title(title)
                 .content(contentHtml)
                 .categoryName(categoryName)
-                .guName(guName)
+                .sigunguCd(sigunguCd)
                 .build();
 
         Post savedPost = postRepository.save(post);
@@ -51,12 +51,12 @@ public class PostService {
             String title,
             String contentHtml,
             String categoryName,
-            String guName
+            String sigunguCd
     ) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("수정할 게시글을 찾을 수 없습니다."));
 
-        post.update(title, contentHtml, categoryName, guName);
+        post.update(title, contentHtml, categoryName, sigunguCd);
     }
 
     public void deletePost(Long postId) {
