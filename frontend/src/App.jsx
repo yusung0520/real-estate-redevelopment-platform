@@ -343,21 +343,32 @@ export default function App() {
             style={{ flex: 1, overflowY: "auto" }}
           >
             {selectedAreaId ? (
-              <div className="sidebar-inner" style={{ height: "100%" }}>
-                <AreaDetailPage
-                  areaId={selectedAreaId}
-                  isBroker={isBroker}
-                  onExit={() => {
-                    setSelectedAreaId(null);
-                    setSelectedArea(null);
-                    setBriefings([]);
-                    setSearchTerm("");
-                    setMapCenter(null);
-                  }}
-                />
+              <div
+                className="sidebar-inner"
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  minHeight: "100%",
+                  background: "#fff",
+                }}
+              >
+                <div style={{ flex: "0 0 auto" }}>
+                  <AreaDetailPage
+                    areaId={selectedAreaId}
+                    isBroker={isBroker}
+                    onExit={() => {
+                      setSelectedAreaId(null);
+                      setSelectedArea(null);
+                      setBriefings([]);
+                      setSearchTerm("");
+                      setMapCenter(null);
+                    }}
+                  />
+                </div>
 
                 <div
                   style={{
+                    flex: "0 0 auto",
                     padding: "20px",
                     borderTop: "1px solid #e5e5ea",
                     background: "#fff",

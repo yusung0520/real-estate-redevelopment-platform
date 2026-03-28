@@ -22,8 +22,9 @@ const ALL_BUSINESS_STAGES = [
 function formatDay(day) {
   if (!day) return "";
   const s = String(day).replace(/-/g, "").trim();
-  if (s.length === 8)
+  if (s.length === 8) {
     return `${s.slice(0, 4)}.${Number(s.slice(4, 6))}.${Number(s.slice(6, 8))}`;
+  }
   return s;
 }
 
@@ -33,6 +34,7 @@ export default function AreaDetailPage({ areaId, isBroker, onExit }) {
 
   useEffect(() => {
     if (!areaId) return;
+
     (async () => {
       setLoading(true);
       try {
@@ -63,6 +65,7 @@ export default function AreaDetailPage({ areaId, isBroker, onExit }) {
         <button className="header-close-btn" onClick={onExit}>
           ✕
         </button>
+
         <div className="header-content-center">
           <div className="tag-group">
             <span className="type-tag">재개발</span>
@@ -70,7 +73,9 @@ export default function AreaDetailPage({ areaId, isBroker, onExit }) {
               <span className="stage-tag">{areaData.stage}</span>
             )}
           </div>
+
           <h2 className="area-title">{areaData.name}</h2>
+
           <p className="area-address">
             {areaData.sigunguCd} {areaData.emdNm || ""}
           </p>
@@ -79,12 +84,15 @@ export default function AreaDetailPage({ areaId, isBroker, onExit }) {
 
       <section className="timeline-section">
         <h3 className="section-title">사업 진행 현황</h3>
+
         <div className="Apple-Timeline-List">
           {ALL_BUSINESS_STAGES.map((baseStage, idx) => {
             const isLast = idx === ALL_BUSINESS_STAGES.length - 1;
+
             const apiItem = areaData.timeline?.find(
               (item) => item.label === baseStage.label,
             );
+
             let statusClass = "TODO";
             if (apiItem?.isCurrent) statusClass = "CURRENT";
             else if (apiItem?.done) statusClass = "DONE";
@@ -103,16 +111,19 @@ export default function AreaDetailPage({ areaId, isBroker, onExit }) {
                   </div>
                   {!isLast && <div className="node-line"></div>}
                 </div>
+
                 <div className="timeline-right">
                   <div className="step-content">
                     <div className="step-main">
                       <span className="order-num">{baseStage.order}</span>
                       <span className="label-text">{baseStage.label}</span>
                     </div>
+
                     <span className="step-date">
                       {apiItem?.date ? formatDay(apiItem.date) : ""}
                     </span>
                   </div>
+
                   {statusClass === "CURRENT" && (
                     <div className="current-badge">현재 단계</div>
                   )}
@@ -120,13 +131,6 @@ export default function AreaDetailPage({ areaId, isBroker, onExit }) {
               </div>
             );
           })}
-        </div>
-      </section>
-
-      <section className="broker-briefing-preview">
-        <h3 className="section-title">전문가 현장 브리핑</h3>
-        <div className="briefing-box-placeholder">
-          <p>중개사님이 등록한 최신 소식이 이곳에 표시됩니다.</p>
         </div>
       </section>
     </div>
