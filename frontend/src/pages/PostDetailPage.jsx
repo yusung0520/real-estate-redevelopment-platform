@@ -1,7 +1,47 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "./PostDetailPage.css";
 
-export default function PostDetailPage({ postId, onBack, onDeleted, onEdit }) {
+const SIGUNGU_LABEL_MAP = {
+  11110: "종로구",
+  11140: "중구",
+  11170: "용산구",
+  11200: "성동구",
+  11215: "광진구",
+  11230: "동대문구",
+  11260: "중랑구",
+  11290: "성북구",
+  11305: "강북구",
+  11320: "도봉구",
+  11350: "노원구",
+  11380: "은평구",
+  11410: "서대문구",
+  11440: "마포구",
+  11470: "양천구",
+  11500: "강서구",
+  11530: "구로구",
+  11545: "금천구",
+  11560: "영등포구",
+  11590: "동작구",
+  11620: "관악구",
+  11650: "서초구",
+  11680: "강남구",
+  11710: "송파구",
+  11740: "강동구",
+};
+
+function getSigunguLabel(sigunguCd) {
+  if (!sigunguCd) return "-";
+  return SIGUNGU_LABEL_MAP[String(sigunguCd)] || sigunguCd;
+}
+
+export default function PostDetailPage({
+  postId,
+  onBack,
+  onDeleted,
+  onEdit,
+  isBroker = false,
+  currentAgentId = null,
+}) {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
@@ -53,6 +93,17 @@ export default function PostDetailPage({ postId, onBack, onDeleted, onEdit }) {
     return `http://localhost:8080${imageUrl}`;
   };
 
+  const canManagePost = useMemo(() => {
+    if (!isBroker || !post) return false;
+
+    const writerAgentId =
+      post.agentId ?? post.writerAgentId ?? post.authorAgentId ?? null;
+
+    if (writerAgentId == null || currentAgentId == null) return false;
+
+    return Number(writerAgentId) === Number(currentAgentId);
+  }, [isBroker, post, currentAgentId]);
+
   const handleDelete = async () => {
     if (!postId) return;
 
@@ -97,6 +148,7 @@ export default function PostDetailPage({ postId, onBack, onDeleted, onEdit }) {
   };
 
   const contentHtml = post?.contentHtml || post?.content || "";
+  const regionText = getSigunguLabel(post?.sigunguCd);
 
   if (loading) {
     return (
@@ -119,7 +171,7 @@ export default function PostDetailPage({ postId, onBack, onDeleted, onEdit }) {
                 onClick={onBack}
                 type="button"
               >
-                완료
+                닫기
               </button>
             </div>
           </header>
@@ -153,7 +205,7 @@ export default function PostDetailPage({ postId, onBack, onDeleted, onEdit }) {
                 onClick={onBack}
                 type="button"
               >
-                완료
+                닫기
               </button>
             </div>
           </header>
@@ -181,29 +233,33 @@ export default function PostDetailPage({ postId, onBack, onDeleted, onEdit }) {
           <h1>브리핑 상세</h1>
 
           <div className="post-detail-header-actions">
-            <button
-              className="post-detail-edit-btn"
-              onClick={() => onEdit?.(postId)}
-              type="button"
-            >
-              수정
-            </button>
+            {canManagePost && (
+              <>
+                <button
+                  className="post-detail-edit-btn"
+                  onClick={() => onEdit?.(postId)}
+                  type="button"
+                >
+                  수정
+                </button>
 
-            <button
-              className="post-detail-delete-btn"
-              onClick={handleDelete}
-              type="button"
-              disabled={deleting}
-            >
-              {deleting ? "삭제중" : "삭제"}
-            </button>
+                <button
+                  className="post-detail-delete-btn"
+                  onClick={handleDelete}
+                  type="button"
+                  disabled={deleting}
+                >
+                  {deleting ? "삭제중" : "삭제"}
+                </button>
+              </>
+            )}
 
             <button
               className="post-detail-done-btn"
               onClick={onBack}
               type="button"
             >
-              완료
+              닫기
             </button>
           </div>
         </header>
@@ -214,14 +270,17 @@ export default function PostDetailPage({ postId, onBack, onDeleted, onEdit }) {
               <span className="meta-label">카테고리</span>
               <span className="meta-value">{post.categoryName || "-"}</span>
             </div>
+
             <div className="post-detail-meta-row">
               <span className="meta-label">지역</span>
-              <span className="meta-value">{post.guName || "-"}</span>
+              <span className="meta-value">{regionText}</span>
             </div>
+
             <div className="post-detail-meta-row">
               <span className="meta-label">작성일</span>
               <span className="meta-value">{formatDate(post.createdAt)}</span>
             </div>
+
             <div className="post-detail-meta-row">
               <span className="meta-label">작성자</span>
               <span className="meta-value">{post.agentName || "-"}</span>

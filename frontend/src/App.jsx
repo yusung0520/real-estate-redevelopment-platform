@@ -15,6 +15,7 @@ export default function App() {
   const [selectedAreaId, setSelectedAreaId] = useState(null);
   const [selectedArea, setSelectedArea] = useState(null);
   const [selectedPostId, setSelectedPostId] = useState(null);
+  const [postDetailSource, setPostDetailSource] = useState(null);
   const [mapCenter, setMapCenter] = useState(null);
   const [isBroker, setIsBroker] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
@@ -130,6 +131,7 @@ export default function App() {
       setSelectedAreaId(null);
       setSelectedArea(null);
       setSelectedPostId(null);
+      setPostDetailSource(null);
       setBriefings([]);
       setView("map");
       setBrokerInfo({
@@ -199,6 +201,7 @@ export default function App() {
         }}
         onOpenPostDetail={(postId) => {
           setSelectedPostId(postId);
+          setPostDetailSource("profile");
           setView("postDetail");
         }}
       />
@@ -226,7 +229,9 @@ export default function App() {
         mode="edit"
         postId={selectedPostId}
         agentData={brokerInfo}
-        onBack={() => setView("postDetail")}
+        onBack={() => {
+          setView("postDetail");
+        }}
         onSuccess={() => {
           setView("postDetail");
         }}
@@ -238,10 +243,23 @@ export default function App() {
     return (
       <PostDetailPage
         postId={selectedPostId}
-        onBack={() => setView("profile")}
+        isBroker={isBroker}
+        currentAgentId={brokerInfo?.id}
+        onBack={() => {
+          if (postDetailSource === "profile") {
+            setView("profile");
+          } else {
+            setView("map");
+          }
+        }}
         onDeleted={() => {
           setSelectedPostId(null);
-          setView("profile");
+
+          if (postDetailSource === "profile") {
+            setView("profile");
+          } else {
+            setView("map");
+          }
         }}
         onEdit={(postId) => {
           setSelectedPostId(postId);
@@ -436,6 +454,7 @@ export default function App() {
                           }}
                           onClick={() => {
                             setSelectedPostId(post.postId);
+                            setPostDetailSource("map");
                             setView("postDetail");
                           }}
                         >
