@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import KakaoMap from "./components/KakaoMap";
 import AreaDetailPage from "./pages/AreaDetailPage";
 import LoginPage from "./pages/LoginPage";
@@ -34,39 +34,9 @@ export default function App() {
   });
 
   const searchContainerRef = useRef(null);
+  const isSelectingRef = useRef(false);
 
-  useEffect(() => {
-    const fetchResults = async () => {
-      if (searchTerm.trim().length < 2) {
-        setSearchResults([]);
-        setShowDropdown(false);
-        return;
-      }
-
-      try {
-        const encodedTerm = encodeURIComponent(searchTerm.trim());
-        const res = await apiGet(`/api/areas/search?q=${encodedTerm}`);
-        const rawResults = Array.isArray(res)
-          ? res
-          : res?.data || res?.content || [];
-
-        const filteredResults = rawResults.filter((area) => {
-          const stage = (area.stage || "").trim();
-          return stage !== "" && stage !== "정보 없음";
-        });
-
-        setSearchResults(filteredResults);
-        setShowDropdown(filteredResults.length > 0);
-      } catch (error) {
-        console.error("검색 실패:", error);
-      }
-    };
-
-    const timer = setTimeout(fetchResults, 500);
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
-
-  const fetchBriefingsBySigungu = async (sigunguCd) => {
+  const fetchBriefingsBySigungu = useCallback(async (sigunguCd) => {
     if (!sigunguCd) {
       setBriefings([]);
       return;
@@ -91,10 +61,68 @@ export default function App() {
     } finally {
       setLoadingBriefings(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const fetchResults = async () => {
+      if (isSelectingRef.current) {
+        isSelectingRef.current = false;
+        return;
+      }
+
+      if (searchTerm.trim().length < 2) {
+        setSearchResults([]);
+        setShowDropdown(false);
+        return;
+      }
+
+      try {
+        const encodedTerm = encodeURIComponent(searchTerm.trim());
+        const res = await apiGet(`/api/areas/search?q=${encodedTerm}`);
+        const rawResults = Array.isArray(res)
+          ? res
+          : res?.data || res?.content || [];
+
+        const filteredResults = rawResults.filter((area) => {
+          const stage = (area.stage || "").trim();
+          return stage !== "" && stage !== "정보 없음";
+        });
+
+        setSearchResults(filteredResults);
+        setShowDropdown(filteredResults.length > 0);
+      } catch (error) {
+        console.error("검색 실패:", error);
+        setSearchResults([]);
+        setShowDropdown(false);
+      }
+    };
+
+    const timer = setTimeout(fetchResults, 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(event.target)
+      ) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleSelectResult = async (area) => {
+    console.log("검색 결과 클릭 area =", area);
+
     const areaId = area.areaId || area.id;
+
+    isSelectingRef.current = true;
 
     setSelectedAreaId(areaId);
     setSelectedArea({
@@ -104,13 +132,23 @@ export default function App() {
       sigunguCd: area.sigunguCd || null,
     });
 
-    setSearchTerm(area.name);
+    setSearchTerm(area.name || "");
+    setSearchResults([]);
     setShowDropdown(false);
 
-    if (area.centerLat && area.centerLng) {
+    if (
+      area.centerLat !== undefined &&
+      area.centerLat !== null &&
+      area.centerLng !== undefined &&
+      area.centerLng !== null
+    ) {
       setMapCenter({
         lat: Number(area.centerLat),
         lng: Number(area.centerLng),
+        targetId: areaId,
+      });
+    } else {
+      setMapCenter({
         targetId: areaId,
       });
     }
@@ -118,12 +156,44 @@ export default function App() {
     await fetchBriefingsBySigungu(area.sigunguCd);
   };
 
-  const handleAreaClick = async (area) => {
-    setSelectedArea(area);
-    setSelectedAreaId(area.areaId);
-    setSearchTerm(area.name || "");
-    await fetchBriefingsBySigungu(area.sigunguCd);
-  };
+  const handleAreaClick = useCallback(
+    async (area) => {
+      console.log("지도 클릭 area =", area);
+
+      setSelectedArea({
+        areaId: area.areaId,
+        name: area.name,
+        stage: area.stage,
+        sigunguCd: area.sigunguCd || null,
+      });
+      setSelectedAreaId(area.areaId);
+
+      isSelectingRef.current = true;
+      setSearchTerm(area.name || "");
+      setSearchResults([]);
+      setShowDropdown(false);
+
+      if (
+        area.centerLat !== undefined &&
+        area.centerLat !== null &&
+        area.centerLng !== undefined &&
+        area.centerLng !== null
+      ) {
+        setMapCenter({
+          lat: Number(area.centerLat),
+          lng: Number(area.centerLng),
+          targetId: area.areaId,
+        });
+      } else {
+        setMapCenter({
+          targetId: area.areaId,
+        });
+      }
+
+      await fetchBriefingsBySigungu(area.sigunguCd);
+    },
+    [fetchBriefingsBySigungu],
+  );
 
   const handleLoginButtonClick = () => {
     if (isBroker) {
@@ -326,10 +396,15 @@ export default function App() {
                   type="text"
                   placeholder="구역명 검색..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onFocus={() =>
-                    searchResults.length > 0 && setShowDropdown(true)
-                  }
+                  onChange={(e) => {
+                    isSelectingRef.current = false;
+                    setSearchTerm(e.target.value);
+                  }}
+                  onFocus={() => {
+                    if (searchResults.length > 0) {
+                      setShowDropdown(true);
+                    }
+                  }}
                 />
                 <span style={{ color: "#86868b" }}>🔍</span>
               </div>
@@ -338,7 +413,7 @@ export default function App() {
                 <div className="search-dropdown">
                   {searchResults.map((area, idx) => (
                     <div
-                      key={area.id || idx}
+                      key={area.areaId || area.id || idx}
                       className="dropdown-item"
                       onMouseDown={(e) => {
                         e.preventDefault();
@@ -379,6 +454,8 @@ export default function App() {
                       setSelectedArea(null);
                       setBriefings([]);
                       setSearchTerm("");
+                      setSearchResults([]);
+                      setShowDropdown(false);
                       setMapCenter(null);
                     }}
                   />

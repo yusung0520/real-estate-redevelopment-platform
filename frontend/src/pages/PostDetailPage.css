@@ -113,12 +113,26 @@
 .meta-label {
   font-size: 13px;
   color: #86868b;
+  flex-shrink: 0;
 }
 
 .meta-value {
   font-size: 14px;
   color: #1d1d1f;
   font-weight: 500;
+  text-align: right;
+  word-break: break-word;
+}
+
+.post-detail-link {
+  color: #5757e9;
+  text-decoration: none;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.post-detail-link:hover {
+  text-decoration: underline;
 }
 
 .post-detail-title {
@@ -229,4 +243,71 @@
   justify-content: center;
   color: #86868b;
   font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .post-detail-page-wrapper {
+    padding: 12px;
+    align-items: stretch;
+  }
+
+  .post-detail-card {
+    width: 100%;
+    max-height: none;
+    min-height: calc(100vh - 24px);
+    border-radius: 22px;
+  }
+
+  .post-detail-header {
+    padding: 18px 16px;
+    gap: 10px;
+  }
+
+  .post-detail-header h1 {
+    font-size: 16px;
+  }
+
+  .post-detail-header-actions {
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .post-detail-edit-btn,
+  .post-detail-delete-btn,
+  .post-detail-done-btn {
+    padding: 7px 12px;
+    border-radius: 14px;
+    font-size: 13px;
+  }
+
+  .post-detail-body {
+    padding: 16px 16px 22px;
+  }
+
+  .post-detail-meta-box,
+  .post-detail-content-box,
+  .post-detail-images-box {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .post-detail-meta-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .meta-value {
+    text-align: left;
+    width: 100%;
+  }
+
+  .post-detail-title {
+    font-size: 21px;
+  }
+
+  .post-detail-content-html {
+    font-size: 14px;
+  }
 }

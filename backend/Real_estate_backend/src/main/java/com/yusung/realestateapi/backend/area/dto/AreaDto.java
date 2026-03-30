@@ -53,6 +53,8 @@ public class AreaDto {
             String name,
             String stage,
             String sigunguCd,
-            String polygon
+            String polygon,
+            BigDecimal centerLat,
+            BigDecimal centerLng
     ) {}
 }

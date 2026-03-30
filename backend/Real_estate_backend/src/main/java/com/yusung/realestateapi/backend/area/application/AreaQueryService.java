@@ -28,7 +28,9 @@ public class AreaQueryService {
     private final CleanupCafeRepository cleanupCafeRepository;
 
     public List<AreaDto.SearchItem> searchAreas(String query) {
-        if (query == null || query.isBlank()) return List.of();
+        if (query == null || query.isBlank()) {
+            return List.of();
+        }
 
         return areaRepository.searchByQuery(query).stream()
                 .map(a -> new AreaDto.SearchItem(
@@ -36,7 +38,8 @@ public class AreaQueryService {
                         a.getName(),
                         a.getStage(),
                         a.getCenterLat(),
-                        a.getCenterLng()))
+                        a.getCenterLng()
+                ))
                 .toList();
     }
 
@@ -47,7 +50,9 @@ public class AreaQueryService {
                         a.getName(),
                         a.getStage(),
                         a.getSigunguCd(),
-                        a.getPolygonGeojson()
+                        a.getPolygonGeojson(),
+                        a.getCenterLat(),
+                        a.getCenterLng()
                 ));
     }
 
@@ -63,8 +68,8 @@ public class AreaQueryService {
 
         String displayName = area.getName();
         if (cafe != null && cafe.getBusinessName() != null) {
-            if (displayName.contains("주택재") || displayName.contains("도시환경") ||
-                    displayName.contains("사업구역") || displayName.equals("재건축사업구역")) {
+            if (displayName.contains("주택재") || displayName.contains("도시환경")
+                    || displayName.contains("사업구역") || displayName.equals("재건축사업구역")) {
                 displayName = cafe.getBusinessName();
             }
         }
@@ -75,7 +80,8 @@ public class AreaQueryService {
 
         var timeline = cleanupProgressRepository.findByAreaIdOrderByStepNoAsc(areaId).stream()
                 .map(p -> {
-                    boolean isCurrentMatch = (currentStageName != null && currentStageName.equals(p.getStepName()));
+                    boolean isCurrentMatch =
+                            (currentStageName != null && currentStageName.equals(p.getStepName()));
                     return new AreaDto.TimelineItem(
                             p.getStepName(),
                             p.getEventDate(),
@@ -97,7 +103,9 @@ public class AreaQueryService {
         var agents = areaAgentRepository.findByAreaIdOrderByIsFeaturedDescAreaAgentIdAsc(areaId).stream()
                 .map(link -> {
                     var agent = agentRepository.findById(link.getAgentId()).orElse(null);
-                    if (agent == null) return null;
+                    if (agent == null) {
+                        return null;
+                    }
                     return new AreaDto.AgentItem(
                             agent.getAgentId(),
                             agent.getName(),

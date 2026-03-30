@@ -34,6 +34,11 @@ function getSigunguLabel(sigunguCd) {
   return SIGUNGU_LABEL_MAP[String(sigunguCd)] || sigunguCd;
 }
 
+function normalizePhoneForTel(phone) {
+  if (!phone) return "";
+  return String(phone).replace(/[^0-9+]/g, "");
+}
+
 export default function PostDetailPage({
   postId,
   onBack,
@@ -149,6 +154,9 @@ export default function PostDetailPage({
 
   const contentHtml = post?.contentHtml || post?.content || "";
   const regionText = getSigunguLabel(post?.sigunguCd);
+  const phoneText = post?.agentPhone || "-";
+  const openChatUrl = post?.kakaoOpenchatUrl || "";
+  const telValue = normalizePhoneForTel(post?.agentPhone);
 
   if (loading) {
     return (
@@ -284,6 +292,37 @@ export default function PostDetailPage({
             <div className="post-detail-meta-row">
               <span className="meta-label">작성자</span>
               <span className="meta-value">{post.agentName || "-"}</span>
+            </div>
+
+            <div className="post-detail-meta-row">
+              <span className="meta-label">중개인 연락처</span>
+              <span className="meta-value">
+                {telValue ? (
+                  <a className="post-detail-link" href={`tel:${telValue}`}>
+                    {phoneText}
+                  </a>
+                ) : (
+                  "-"
+                )}
+              </span>
+            </div>
+
+            <div className="post-detail-meta-row">
+              <span className="meta-label">오픈채팅 주소</span>
+              <span className="meta-value">
+                {openChatUrl ? (
+                  <a
+                    className="post-detail-link"
+                    href={openChatUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    오픈채팅 바로가기
+                  </a>
+                ) : (
+                  "-"
+                )}
+              </span>
             </div>
           </div>
 
