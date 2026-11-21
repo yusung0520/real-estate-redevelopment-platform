@@ -7,7 +7,6 @@ HELP.md
 build/
 out/
 target/
-!gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
 
@@ -17,6 +16,7 @@ target/
 *.class
 *.jar
 *.war
+!gradle/wrapper/gradle-wrapper.jar
 
 # ===============================
 # Local secret config (중요)

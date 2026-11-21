@@ -24,6 +24,7 @@ export default function App() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [briefings, setBriefings] = useState([]);
   const [loadingBriefings, setLoadingBriefings] = useState(false);
+  const [searchStatus, setSearchStatus] = useState("idle");
 
   const [brokerInfo, setBrokerInfo] = useState({
     id: null,
@@ -34,7 +35,7 @@ export default function App() {
   });
 
   const searchContainerRef = useRef(null);
-  const isSelectingRef = useRef(false);
+  const suppressedSearchTermRef = useRef(null);
 
   const fetchBriefingsBySigungu = useCallback(async (sigunguCd) => {
     if (!sigunguCd) {
@@ -64,21 +65,28 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const fetchResults = async () => {
-      if (isSelectingRef.current) {
-        isSelectingRef.current = false;
-        return;
-      }
+    if (suppressedSearchTermRef.current === searchTerm) {
+      suppressedSearchTermRef.current = null;
+      return;
+    }
+    suppressedSearchTermRef.current = null;
 
+    let ignoreResult = false;
+
+    const fetchResults = async () => {
       if (searchTerm.trim().length < 2) {
         setSearchResults([]);
         setShowDropdown(false);
+        setSearchStatus("idle");
         return;
       }
 
       try {
+        setSearchStatus("loading");
         const encodedTerm = encodeURIComponent(searchTerm.trim());
         const res = await apiGet(`/api/areas/search?q=${encodedTerm}`);
+        if (ignoreResult) return;
+
         const rawResults = Array.isArray(res)
           ? res
           : res?.data || res?.content || [];
@@ -89,16 +97,32 @@ export default function App() {
         });
 
         setSearchResults(filteredResults);
-        setShowDropdown(filteredResults.length > 0);
+        setShowDropdown(true);
+
+        if (filteredResults.length === 0) {
+          setSearchStatus("empty");
+          setSelectedAreaId(null);
+          setSelectedArea(null);
+          setBriefings([]);
+          setMapCenter(null);
+        } else {
+          setSearchStatus("results");
+        }
       } catch (error) {
+        if (ignoreResult) return;
+
         console.error("검색 실패:", error);
         setSearchResults([]);
-        setShowDropdown(false);
+        setSearchStatus("error");
+        setShowDropdown(true);
       }
     };
 
-    const timer = setTimeout(fetchResults, 300);
-    return () => clearTimeout(timer);
+    const timer = setTimeout(fetchResults, 500);
+    return () => {
+      ignoreResult = true;
+      clearTimeout(timer);
+    };
   }, [searchTerm]);
 
   useEffect(() => {
@@ -122,8 +146,6 @@ export default function App() {
 
     const areaId = area.areaId || area.id;
 
-    isSelectingRef.current = true;
-
     setSelectedAreaId(areaId);
     setSelectedArea({
       areaId,
@@ -132,8 +154,10 @@ export default function App() {
       sigunguCd: area.sigunguCd || null,
     });
 
+    suppressedSearchTermRef.current = area.name || "";
     setSearchTerm(area.name || "");
     setSearchResults([]);
+    setSearchStatus("idle");
     setShowDropdown(false);
 
     if (
@@ -168,9 +192,10 @@ export default function App() {
       });
       setSelectedAreaId(area.areaId);
 
-      isSelectingRef.current = true;
+      suppressedSearchTermRef.current = area.name || "";
       setSearchTerm(area.name || "");
       setSearchResults([]);
+      setSearchStatus("idle");
       setShowDropdown(false);
 
       if (
@@ -393,39 +418,58 @@ export default function App() {
             <div className="search-container" ref={searchContainerRef}>
               <div className="search-box">
                 <input
+                  id="area-search-input"
+                  name="areaSearch"
                   type="text"
+                  aria-label="정비구역명 검색"
                   placeholder="구역명 검색..."
                   value={searchTerm}
                   onChange={(e) => {
-                    isSelectingRef.current = false;
                     setSearchTerm(e.target.value);
+                    setSearchResults([]);
+                    setSearchStatus("idle");
+                    setShowDropdown(false);
                   }}
-                  onFocus={() => {
-                    if (searchResults.length > 0) {
-                      setShowDropdown(true);
-                    }
-                  }}
+                  onFocus={() =>
+                    (searchResults.length > 0 ||
+                      searchStatus === "empty" ||
+                      searchStatus === "error") &&
+                    setShowDropdown(true)
+                  }
                 />
                 <span style={{ color: "#86868b" }}>🔍</span>
               </div>
 
               {showDropdown && (
                 <div className="search-dropdown">
-                  {searchResults.map((area, idx) => (
-                    <div
-                      key={area.areaId || area.id || idx}
-                      className="dropdown-item"
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        handleSelectResult(area);
-                      }}
-                    >
-                      <div className="item-info">
-                        <span className="item-name">{area.name}</span>
-                        <span className="item-address">{area.stage}</span>
-                      </div>
+                  {searchStatus === "empty" ? (
+                    <div className="search-feedback" role="status">
+                      검색 결과가 없습니다. 다른 구역명으로 검색해 주세요.
                     </div>
-                  ))}
+                  ) : searchStatus === "error" ? (
+                    <div
+                      className="search-feedback search-feedback-error"
+                      role="alert"
+                    >
+                      검색 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.
+                    </div>
+                  ) : (
+                    searchResults.map((area, idx) => (
+                      <div
+                        key={area.areaId || area.id || idx}
+                        className="dropdown-item"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          handleSelectResult(area);
+                        }}
+                      >
+                        <div className="item-info">
+                          <span className="item-name">{area.name}</span>
+                          <span className="item-address">{area.stage}</span>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               )}
             </div>

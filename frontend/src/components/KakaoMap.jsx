@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { apiGet } from "../api/client";
 
 function getStageColor(stage) {
@@ -94,6 +94,38 @@ export default function KakaoMap({ onAreaClick, center, selectedAreaId }) {
     onAreaClickRef.current = onAreaClick;
   }, [onAreaClick]);
 
+  const clearSelectedPolygon = useCallback(() => {
+    if (selectedPolygonRef.current) {
+      selectedPolygonRef.current.setOptions({
+        strokeWeight: 1,
+        strokeColor: selectedPolygonRef.current.originalColor,
+        strokeOpacity: 0.6,
+        fillColor: selectedPolygonRef.current.originalColor,
+        fillOpacity: 0.15,
+        zIndex: 1,
+      });
+      selectedPolygonRef.current = null;
+    }
+  }, []);
+
+  const highlightPolygon = useCallback((polygon) => {
+    clearSelectedPolygon();
+
+    polygon.setOptions({
+      strokeWeight: 3,
+      strokeColor: "#5757e9",
+      strokeOpacity: 1,
+      fillColor: polygon.originalColor,
+      fillOpacity: 0.3,
+      zIndex: 100,
+    });
+    selectedPolygonRef.current = polygon;
+  }, [clearSelectedPolygon]);
+
+  useEffect(() => {
+    if (selectedAreaId == null) clearSelectedPolygon();
+  }, [clearSelectedPolygon, selectedAreaId]);
+
   useEffect(() => {
     (async () => {
       try {
@@ -124,30 +156,6 @@ export default function KakaoMap({ onAreaClick, center, selectedAreaId }) {
     });
   }, []);
 
-  const highlightPolygon = (polygon) => {
-    if (selectedPolygonRef.current && selectedPolygonRef.current !== polygon) {
-      selectedPolygonRef.current.setOptions({
-        strokeWeight: 1,
-        strokeColor: selectedPolygonRef.current.originalColor,
-        strokeOpacity: 0.6,
-        fillColor: selectedPolygonRef.current.originalColor,
-        fillOpacity: 0.15,
-        zIndex: 1,
-      });
-    }
-
-    polygon.setOptions({
-      strokeWeight: 3,
-      strokeColor: "#5757e9",
-      strokeOpacity: 1,
-      fillColor: polygon.originalColor,
-      fillOpacity: 0.3,
-      zIndex: 100,
-    });
-
-    selectedPolygonRef.current = polygon;
-  };
-
   useEffect(() => {
     if (!mapReady || !mapRef.current || !center) return;
 
@@ -173,7 +181,7 @@ export default function KakaoMap({ onAreaClick, center, selectedAreaId }) {
         highlightPolygon(targetPolygon);
       }
     }
-  }, [center, mapReady]);
+  }, [center, highlightPolygon, mapReady]);
 
   useEffect(() => {
     if (!mapReady || !selectedAreaId) return;
@@ -185,7 +193,7 @@ export default function KakaoMap({ onAreaClick, center, selectedAreaId }) {
     if (targetPolygon) {
       highlightPolygon(targetPolygon);
     }
-  }, [selectedAreaId, mapReady]);
+  }, [highlightPolygon, mapReady, selectedAreaId]);
 
   useEffect(() => {
     if (!window.kakao || !window.kakao.maps || !mapReady || areas.length === 0)
@@ -251,7 +259,7 @@ export default function KakaoMap({ onAreaClick, center, selectedAreaId }) {
         });
       });
     });
-  }, [areas, mapReady]);
+  }, [areas, highlightPolygon, mapReady]);
 
   return (
     <div style={{ width: "100%", height: "100%", position: "relative" }}>

@@ -10,8 +10,7 @@
 2. 구역을 선택하면 상세 API에서 현재 단계, 단계별 날짜, 활동 이력과 연결된 중개사 정보를 함께 조회합니다.
 3. 상세 화면은 14개 기준 단계를 먼저 배치한 뒤 API에서 받은 이력을 이름으로 대응시킵니다. 현재 단계가 우선 표시되며, 이력이 없는 단계는 날짜를 비워 둡니다.
 
-> **시연 자료**　구역 선택과 14단계 타임라인을 보여 줄 화면을 추가할 자리입니다.
-<!-- 이 문단을 실제 촬영한 GIF 또는 이미지와 한 줄 설명으로 교체합니다. -->
+실제 브라우저 시연에서는 성수 검색 → 제3구역 선택 → 현재 단계와 이력 날짜 확인 → 14단계 기준 타임라인 스크롤 순서로 동작을 확인했습니다.
 
 ## 로컬 실행 검증 결과
 
@@ -47,12 +46,116 @@
 
 경로는 [AreaController](backend/Real_estate_backend/src/main/java/com/yusung/realestateapi/backend/area/api/AreaController.java)에서, 목록 필터와 검색 조건은 [AreaV3Repository](backend/Real_estate_backend/src/main/java/com/yusung/realestateapi/backend/area/infra/AreaV3Repository.java)에서 확인할 수 있습니다.
 
-## 로컬에서 확인하기
+## 로컬 실행 및 검증
 
-JDK 17, MySQL, Node.js와 npm, Kakao Maps JavaScript 키가 필요합니다. 구역을 실제로 보려면 로컬 DB에 경계와 사업장 매칭 데이터가 있어야 합니다.
+### 실행 환경
 
-- **백엔드**　`backend/Real_estate_backend`에서 로컬 DB 연결 설정을 준비합니다. 현재 저장소에는 Gradle wrapper JAR와 실행 권한이 누락되어 `./gradlew bootRun`만으로 실행할 수 없습니다. 이번 로컬 검증은 JDK 17과 설치된 Gradle 9.7.1의 `bootRun`을 사용했습니다. 저장소 wrapper 설정(9.2.1)과 실행 버전의 통일 및 테스트 환경 정리가 남아 있습니다.
-- **프론트엔드**　`frontend/.env.local`에 `VITE_KAKAO_MAP_KEY`를 설정한 뒤 `frontend`에서 `npm install`, `npm run dev`를 실행합니다. Vite는 `/api` 요청을 로컬 백엔드의 8080 포트로 전달합니다. 검증 환경의 Kakao 허용 출처는 `http://localhost:5173`이며, `127.0.0.1` 주소는 별도 등록 없이는 동일하게 동작하지 않습니다.
-- **다음 작업**　매칭하지 못한 구역과 중복 후보를 실제 데이터로 점검하고, 수집처와 화면 사이에서 단계명이 다르게 표기되는 경우를 테스트할 예정입니다.
+- JDK 17
+- Gradle 8.12.1 Wrapper
+- Node.js 및 npm
+- MySQL 8.0 (`127.0.0.1:3307`의 격리된 복구 DB)
+- Kakao Maps JavaScript API 키
+
+Gradle은 시스템 설치본 대신 프로젝트의 Wrapper를 사용한다.
+
+```bash
+cd backend/Real_estate_backend
+./gradlew --version
+```
+
+### 로컬 비밀 설정
+
+DB 비밀번호와 Kakao Maps 키는 Git에 포함하지 않는다.
+
+- 백엔드: `backend/Real_estate_backend/.env.recovery-backend`
+- DB 계정 보관: `backend/Real_estate_backend/.env.recovery-mysql`
+- 프런트: `frontend/.env`의 `VITE_KAKAO_MAP_KEY`
+
+위 파일들은 로컬에서만 관리한다. 백엔드 환경 파일에는 다음 이름의 변수를 사용한다.
+
+```dotenv
+SPRING_DATASOURCE_URL=jdbc:mysql://127.0.0.1:3307/real_estate_db
+SPRING_DATASOURCE_USERNAME=portfolio_app
+SPRING_DATASOURCE_PASSWORD=<local-password>
+SPRING_JPA_HIBERNATE_DDL_AUTO=none
+SPRING_SQL_INIT_MODE=never
+PIPELINE_CRON=-
+PIPELINE_DEV_ENABLED=false
+SPRING_TASK_SCHEDULING_ENABLED=false
+```
+
+### 포트폴리오 복구 DB 실행
+
+Docker Desktop을 실행한 뒤 격리된 MySQL 컨테이너를 시작한다.
+
+```bash
+docker start real-estate-portfolio-mysql-20261120
+```
+
+- MySQL: `127.0.0.1:3307`
+- 스키마: `real_estate_db`
+- 기존 3306 MariaDB와 별도 인스턴스
+
+백업 재복원이나 DB 초기화는 일반 실행 과정에 포함하지 않는다.
+
+### 백엔드 실행
+
+```bash
+cd backend/Real_estate_backend
+
+set -a
+source .env.recovery-backend
+set +a
+
+JAVA_HOME="$(/usr/libexec/java_home -v 17)" ./gradlew bootRun
+```
+
+기본 설정은 Hibernate DDL 변경, SQL 초기화 및 자동 수집 스케줄을 비활성화한다.
+
+백엔드 주소: `http://localhost:8080`
+
+### 프런트 실행
+
+```bash
+cd frontend
+npm ci
+npm run dev -- --host 127.0.0.1
+```
+
+화면 주소: `http://localhost:5173`
+
+Kakao Developers의 JavaScript 키 허용 출처도 `http://localhost:5173`으로 등록한다. `127.0.0.1`은 별도 출처이므로 화면 접속 주소로 사용하지 않는다.
+
+### 주요 확인 경로
+
+```text
+GET /api/areas?page=0&size=20
+GET /api/areas/search?q=성수
+GET /api/areas/678/detail
+```
+
+브라우저에서는 지도 배경 표시 → 성수 검색 → 구역 선택 → 현재 단계 및 14단계 타임라인 순서로 확인한다.
+
+### 검증 결과와 명령
+
+백엔드 테스트는 `test` 프로필과 인메모리 H2를 사용한다. 로컬 3306/3307 DB에는 연결하지 않는다.
+
+```bash
+cd backend/Real_estate_backend
+JAVA_HOME="$(/usr/libexec/java_home -v 17)" ./gradlew clean test
+JAVA_HOME="$(/usr/libexec/java_home -v 17)" ./gradlew clean build
+```
+
+```bash
+cd frontend
+npm run lint
+npm run build
+```
+
+- 백엔드: H2로 격리한 JUnit 테스트 2개 및 Gradle 빌드 통과
+- 프론트엔드: ESLint 및 Vite 프로덕션 빌드 통과
+- 실제 서비스: 3307 복구 DB에 연결한 뒤 `http://localhost:5173`에서 배경 지도, 성수 검색, 제3구역 선택, 상세 날짜, 14단계 기준 타임라인을 직접 조작해 확인
+
+자동화 테스트 통과와 실제 브라우저 시연 검증은 서로 다른 확인 범위다. 데이터 수치는 **2026-03-19 백업 기준**으로, DB 전체 구역은 2,302건이고 그중 사업장과 매칭되어 목록 API로 조회되는 구역은 440건이다. 14단계는 UI가 사용하는 기준 단계 수이며, 모든 구역에 실제 이력 14건이 저장되어 있다는 뜻은 아니다.
 
 중개사 브리핑과 거래 상태 관리 등 초기 구상은 [기획 문서](https://github.com/yusung0520/real-estate-redevelopment-platform/blob/0160d5abe5a81590a6f3346b8d95d08b59aafb60/README.md)에서 볼 수 있습니다.

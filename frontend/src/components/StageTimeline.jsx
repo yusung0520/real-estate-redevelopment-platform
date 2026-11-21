@@ -1,5 +1,4 @@
 // src/components/StageTimeline.jsx
-import { formatDate } from "../utils/stage";
 
 // ✅ 기본 단계 목록(몽땅 카페처럼 "항상 전체 노출")
 const DEFAULT_STAGES = [

@@ -161,6 +161,17 @@ body {
   border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
+.search-feedback {
+  padding: 16px 20px;
+  color: #6e6e73;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.search-feedback-error {
+  color: #b42318;
+}
+
 /* ⭐ 텍스트 뭉침을 해결하는 핵심 레이아웃 */
 .dropdown-item {
   padding: 12px 20px;

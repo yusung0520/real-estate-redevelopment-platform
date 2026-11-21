@@ -53,10 +53,10 @@ export default function AreaListPage() {
             <div style={{ fontWeight: 700 }}>{a.name}</div>
 
             <div style={{ color: "#2563EB", fontWeight: 600 }}>
-              공식 단계: {a.officialStageLabel}
+              공식 단계: {stageText}
             </div>
             <div style={{ fontSize: 12, color: "#666" }}>
-              기준일: {a.officialStageDate}
+              기준일: {stageDate || "확인 중"}
             </div>
           </div>
         );
