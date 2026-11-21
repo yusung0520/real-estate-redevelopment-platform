@@ -12,6 +12,12 @@
 
 실제 브라우저 시연에서는 성수 검색 → 제3구역 선택 → 현재 단계와 이력 날짜 확인 → 14단계 기준 타임라인 스크롤 순서로 동작을 확인했습니다.
 
+[실제 시연 영상 · 약 27초](https://raw.githubusercontent.com/yusung0520/yusung0520/main/docs/media/redevelopment-demo.mp4) · [화면 캡처 4장과 검증 기록](https://github.com/yusung0520/yusung0520/blob/main/projects/redevelopment-verification.md)
+
+![성수 검색 결과와 지도](https://raw.githubusercontent.com/yusung0520/yusung0520/main/docs/media/redevelopment-search.webp)
+
+빈 검색 결과와 API 요청 실패는 구분해서 안내합니다. 빈 결과가 확정되면 이전 상세와 지도 강조를 함께 해제하고, 입력 중에는 기존 상세를 유지합니다.
+
 ## 로컬 실행 검증 결과
 
 2026-03-19 SQL 백업을 기존 DB와 분리된 MySQL 8.0.44에 복원해 검증했습니다. 아래 수치는 복원 후 SQL 조회 및 API 응답으로 확인한 범위입니다.
@@ -26,7 +32,7 @@
 
 목록 API는 전체 구역 중 사업장 정보와 연결된 구역만 반환합니다. **14개 단계는 화면의 기준 구조**이며, 시연한 성수전략정비구역 제3구역(`areaId=678`)에는 실제 이력 2건이 있습니다. 기록이 없는 단계는 날짜 없이 비활성 상태로 표시합니다.
 
-백업 기준의 데이터이므로 현재 정비사업 현황을 나타내지 않습니다. 구역 678의 활동 기록과 중개사 응답은 비어 있습니다. 자세한 검증 범위와 남은 실행 환경 문제는 [실행 검증 기록](https://github.com/yusung0520/yusung0520/blob/main/projects/redevelopment-verification.md)에 정리했습니다.
+백업 기준의 데이터이므로 현재 정비사업 현황을 나타내지 않습니다. 구역 678의 활동 기록과 중개사 응답은 비어 있습니다. 최신 검증 결과와 시연 자료는 [실행 검증 기록](https://github.com/yusung0520/yusung0520/blob/main/projects/redevelopment-verification.md)에 정리했습니다.
 
 ## 데이터 처리에서 결정한 것
 
