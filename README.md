@@ -13,6 +13,22 @@
 > **시연 자료**　구역 선택과 14단계 타임라인을 보여 줄 화면을 추가할 자리입니다.
 <!-- 이 문단을 실제 촬영한 GIF 또는 이미지와 한 줄 설명으로 교체합니다. -->
 
+## 로컬 실행 검증 결과
+
+2026-03-19 SQL 백업을 기존 DB와 분리된 MySQL 8.0.44에 복원해 검증했습니다. 아래 수치는 복원 후 SQL 조회 및 API 응답으로 확인한 범위입니다.
+
+| 구분 | 확인한 값 |
+| --- | --- |
+| 저장된 전체 구역 | 2,302건 |
+| 사업장 정보와 연결된 목록 조회 대상 | 440개 구역 |
+| 저장된 단계 이력 | 1,869건 |
+| 목록 / 검색 / 상세 API | 모두 HTTP 200 |
+| 브라우저 검증 | 배경 지도, 구역 경계, 성수 검색, 구역 선택, 상세 및 타임라인 표시 |
+
+목록 API는 전체 구역 중 사업장 정보와 연결된 구역만 반환합니다. **14개 단계는 화면의 기준 구조**이며, 시연한 성수전략정비구역 제3구역(`areaId=678`)에는 실제 이력 2건이 있습니다. 기록이 없는 단계는 날짜 없이 비활성 상태로 표시합니다.
+
+백업 기준의 데이터이므로 현재 정비사업 현황을 나타내지 않습니다. 구역 678의 활동 기록과 중개사 응답은 비어 있습니다. 자세한 검증 범위와 남은 실행 환경 문제는 [실행 검증 기록](https://github.com/yusung0520/yusung0520/blob/main/projects/redevelopment-verification.md)에 정리했습니다.
+
 ## 데이터 처리에서 결정한 것
 
 **비슷한 구역명을 무조건 연결하지 않습니다.** 자동 매칭의 완전 일치 단계는 이름을 정규화하고 같은 이름의 후보가 여러 개인 경우 건너뜁니다. 부분 일치 단계는 최소 점수 외에 1위와 2위 후보의 점수 차이도 확인합니다. 후보가 비슷하거나 이미 연결된 구역이면 미연결 상태로 남길 수 있고, `dryRun`으로 저장 전에 결과를 살펴볼 수 있습니다. [자동 매칭 코드](backend/Real_estate_backend/src/main/java/com/yusung/realestateapi/backend/integration/cleanup/application/CleanupCafeAreaAutoMatchService.java)
@@ -35,8 +51,8 @@
 
 JDK 17, MySQL, Node.js와 npm, Kakao Maps JavaScript 키가 필요합니다. 구역을 실제로 보려면 로컬 DB에 경계와 사업장 매칭 데이터가 있어야 합니다.
 
-- **백엔드**　`backend/Real_estate_backend`에서 로컬 DB 연결 설정을 준비하고 `./gradlew bootRun`으로 실행합니다.
-- **프론트엔드**　`frontend/.env.local`에 `VITE_KAKAO_MAP_KEY`를 설정한 뒤 `frontend`에서 `npm install`, `npm run dev`를 실행합니다. Vite는 `/api` 요청을 로컬 백엔드의 8080 포트로 전달합니다.
+- **백엔드**　`backend/Real_estate_backend`에서 로컬 DB 연결 설정을 준비합니다. 현재 저장소에는 Gradle wrapper JAR와 실행 권한이 누락되어 `./gradlew bootRun`만으로 실행할 수 없습니다. 이번 로컬 검증은 JDK 17과 설치된 Gradle 9.7.1의 `bootRun`을 사용했습니다. 저장소 wrapper 설정(9.2.1)과 실행 버전의 통일 및 테스트 환경 정리가 남아 있습니다.
+- **프론트엔드**　`frontend/.env.local`에 `VITE_KAKAO_MAP_KEY`를 설정한 뒤 `frontend`에서 `npm install`, `npm run dev`를 실행합니다. Vite는 `/api` 요청을 로컬 백엔드의 8080 포트로 전달합니다. 검증 환경의 Kakao 허용 출처는 `http://localhost:5173`이며, `127.0.0.1` 주소는 별도 등록 없이는 동일하게 동작하지 않습니다.
 - **다음 작업**　매칭하지 못한 구역과 중복 후보를 실제 데이터로 점검하고, 수집처와 화면 사이에서 단계명이 다르게 표기되는 경우를 테스트할 예정입니다.
 
 중개사 브리핑과 거래 상태 관리 등 초기 구상은 [기획 문서](https://github.com/yusung0520/real-estate-redevelopment-platform/blob/0160d5abe5a81590a6f3346b8d95d08b59aafb60/README.md)에서 볼 수 있습니다.
